@@ -1,0 +1,4 @@
+scenario,patient_count,wait_count,median_total_valid_wait_minutes,p90_total_valid_wait_minutes,long_wait_pct,urgent_median_wait_minutes,long_wait_threshold_minutes,consultation_reduction_pct,peak_priority_reduction_pct,median_wait_change_vs_baseline_minutes,p90_wait_change_vs_baseline_minutes,long_wait_change_vs_baseline_pp
+Baseline,34728,34728,0.0,48.239113371854984,7.115296014743147,0.0,60.0,0.0,0.0,0.0,0.0,0.0
+Consultation wait reduction,34728,34728,0.0,41.40033713134099,5.019004837595024,0.0,60.0,20.0,0.0,0.0,-6.838776240513994,-2.0962911771481227
+Peak priority fast-track,34728,34728,0.0,46.983595748263326,6.763994471319973,0.0,60.0,0.0,20.0,0.0,-1.2555176235916576,-0.3513015434231743

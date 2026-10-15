@@ -1,0 +1,2 @@
+patient_count,wait_count,mean_wait_minutes,median_wait_minutes,p90_wait_minutes,long_wait_pct,median_los_minutes,p90_los_minutes,long_wait_threshold_minutes,input_rows,excluded_invalid_timing_rows,analysis_rows,missing_total_wait_rows,total_wait_column,synthetic_data
+34728.0,34728.0,13.75313734570965,0.0,48.239113371854984,7.115296014743147,79.88088010653334,239.33534787171328,60.0,35082,354,34728,0,Total_Waiting_Time_Valid,True

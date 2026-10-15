@@ -1,0 +1,15 @@
+scenario,department,patient_count,baseline_median_wait_minutes,scenario_median_wait_minutes,median_wait_change_minutes,median_wait_change_pct
+Consultation wait reduction,Chronic Care,2594,0.0,0.0,0.0,
+Consultation wait reduction,Emergency,5714,0.0,0.0,0.0,
+Consultation wait reduction,Maternal Health,3360,0.0,0.0,0.0,
+Consultation wait reduction,Outpatient Department,14002,10.660814730150001,9.070882893393334,-1.5899318367566675,-14.91379296049634
+Consultation wait reduction,Paediatrics,6788,0.0,0.0,0.0,
+Consultation wait reduction,TB/HIV Clinic,2247,0.0,0.0,0.0,
+Consultation wait reduction,Unknown,23,0.0,0.0,0.0,
+Peak priority fast-track,Chronic Care,2594,0.0,0.0,0.0,
+Peak priority fast-track,Emergency,5714,0.0,0.0,0.0,
+Peak priority fast-track,Maternal Health,3360,0.0,0.0,0.0,
+Peak priority fast-track,Outpatient Department,14002,10.660814730150001,10.504523683491666,-0.15629104665833538,-1.4660328559723157
+Peak priority fast-track,Paediatrics,6788,0.0,0.0,0.0,
+Peak priority fast-track,TB/HIV Clinic,2247,0.0,0.0,0.0,
+Peak priority fast-track,Unknown,23,0.0,0.0,0.0,

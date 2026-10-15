@@ -1,0 +1,204 @@
+Metadata-Version: 2.4
+Name: patient-flow
+Version: 0.1.0
+Summary: Hospital patient flow analysis package
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: pandas>=2.0
+Requires-Dist: numpy>=1.24
+Requires-Dist: matplotlib>=3.7
+Requires-Dist: seaborn>=0.12
+Requires-Dist: scipy>=1.11
+Requires-Dist: pyyaml>=6.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: ruff>=0.5; extra == "dev"
+
+# Hospital Patient Flow Analysis
+## Chilungamo District Hospital (Fictional, Malawi) — Synthetic Portfolio Dataset
+
+## Project Overview
+
+This project analyses patient flow and operational efficiency at a fictional Malawian district hospital, using a synthetic dataset simulating a full year of patient encounters across six clinical departments. It demonstrates SQL, Python, statistics, and data visualization applied to a genuine operational question: where in the patient journey do bottlenecks actually occur, and what does the evidence say a hospital manager could do about it?
+
+This is **Project 3** in a 10-project portfolio built while studying MSc Data Science at MUST, following Project 1 (Health Facility Data Quality Assessment) and Project 2 (Essential Medicines Stock-Out Analysis). Where those two projects focused on data quality and inventory/operations analytics respectively, this one focuses on **patient-level operational flow**: waiting times, queueing, and department-level bottlenecks.
+
+**"Chilungamo District Hospital" is entirely fictional** — verified not to match any real Malawian hospital name. This is a deliberate departure from Projects 1–2, which used real, verified facility names with synthetic figures. Patient-level timestamp data (arrival, registration, triage, consultation, lab, pharmacy) is detailed enough that attaching it to a real, named hospital could be misread as a claim about that hospital's actual performance, however clearly labeled as synthetic. A fictional setting avoids that risk while still representing a realistic district-hospital environment (department mix, staffing levels, and volumes are set to be plausible for a district hospital, not a central/tertiary one).
+
+## Problem Statement
+
+Hospitals routinely face patient congestion, long waiting times, and department bottlenecks — but without granular, per-stage timestamp data, it's hard to tell whether the problem is arrival volume, staffing capacity, a specific shared resource (like the lab), or something else. This project demonstrates how a data analyst could isolate exactly where time is lost in the patient journey and quantify it, rather than relying on general impressions of "the hospital is busy."
+
+## Why Patient-Flow Analysis Matters
+
+Waiting time is one of the most direct, measurable indicators of a health facility's operational health and a major driver of patient dissatisfaction — and unlike many clinical quality metrics, it can be measured and improved through workflow and staffing changes alone, without new equipment or funding. Identifying *which* stage of the visit (registration, triage, consultation, lab, or pharmacy) is actually responsible for delay turns a vague complaint ("this hospital is slow") into a specific, addressable operational question.
+
+## Malawi Healthcare Context
+
+District hospitals in Malawi typically combine outpatient, emergency, maternal, paediatric, chronic-disease, and TB/HIV services under one roof, usually with a single shared laboratory and pharmacy serving every department — exactly the structure this project simulates. Public-sector hospitals commonly operate with limited clinical staff relative to patient volume, which is reflected in the department-level staffing assumptions used in the simulation (see Methodology).
+
+## Objectives
+
+1. Simulate a realistic year of patient flow as a genuine queueing system, not independently-random fields
+2. Identify which departments and time periods experience the most congestion
+3. Quantify the specific contribution of laboratory and pharmacy delays to total visit time
+4. Test statistically whether the patterns found (department differences, peak-period congestion, queue-size effects) are real rather than incidental
+5. Design (not yet build) a Power BI dashboard around a hospital administrator's actual workflow
+6. Produce findings and recommendations that come directly from the executed analysis, not asserted beforehand
+
+## Dataset
+
+**35,082 patient encounters** across 6 departments (Outpatient Department, Emergency, Maternal Health, Paediatrics, Chronic Care, TB/HIV Clinic) over a full simulated year (2025).
+
+## Data-Generation Methodology
+
+This is **not** independently-random field generation — it is a genuine discrete-event queueing simulation:
+
+- Each department has its own fixed number of registration clerks, triage nurses, and doctors.
+- **Laboratory and Pharmacy are shared, hospital-wide resources** (3 lab technicians, 4 pharmacists) drawing patients from *every* department — mirroring how a real hospital has one central lab and pharmacy, not one per department.
+- Arrivals follow an hour-of-day distribution with a defined peak window (morning peak for daytime departments; an evening peak for Emergency, which also runs overnight).
+- Service durations are drawn from **triangular distributions** (most visits are quick, a realistic minority run long) — this right-skew is what allows genuine backlogs to form.
+- A patient's queue position, waiting time, and total visit length **emerge from resource contention**, not from a formula applied afterward. This is confirmed directly in the notebook: queue size correlates with waiting time at **r = 0.92**, priority level correctly predicts shorter waits for higher-acuity patients, and admitted patients show longer length of stay than discharged patients — none of these were asserted; they came out of the simulation mechanics.
+
+Full detail and all tuning decisions (including a documented mid-build fix, where an initial parameter set produced unrealistically extreme length-of-stay values from lab-queue overload, and was retuned) are in `notebooks/hospital_patient_flow_analysis.ipynb`, Section 1.
+
+## Data-Quality Issues (Deliberately Injected)
+
+Seven categories, each reproducible via its own random seed: missing values (satisfaction score, referral status), duplicate encounter records, impossible timestamps (consultation before arrival), negative waiting times, extreme length-of-stay outliers, and incorrect/typo'd department values. An eighth condition — missing lab timestamps where no lab was requested — was verified as already correctly absent rather than needing a fix.
+
+## Data-Cleaning Methodology
+
+Each injected problem is handled with a stated, deliberate decision rather than a blanket fix: exact duplicates are dropped; department typos are mapped to their correct value where unambiguous, and flagged rather than guessed at otherwise; impossible timestamps and negative waits are flagged and excluded from *duration* calculations while the encounter itself is kept in *volume* counts; length-of-stay outliers are identified via an IQR rule and then specifically investigated (see Key Findings #6) rather than simply removed; missing satisfaction/referral values are left missing, never imputed. Full detail in the notebook, Section 4.
+
+## SQL Analysis
+
+`sql/` contains a 3-table relational SQLite database (`encounters`, `departments`, `doctors`) and 17 queries across 3 files covering all 15 questions from the project brief (volume, trends, waiting time, performance ranking) using `JOIN`s, `CASE`, CTEs, window functions (`RANK()`, `PERCENT_RANK()`, rolling `AVG() OVER()`), and date functions. **A real bug was found and fixed while building this layer:** the injected "incorrect department value" data-quality problem corrupted a handful of encounter rows' `Department` field without touching `Doctor_ID`, which initially made the naive `doctors` dimension table show individual doctors working across multiple departments. The fix — deriving each doctor's department from their own ID rather than the encounter-level field — is documented in `sql/README.md`. Every query's results were cross-checked against the Python notebook.
+
+## Python Analysis
+
+`notebooks/hospital_patient_flow_analysis.ipynb` covers, in order: simulation and generation, data-quality injection, inspection, cleaning, feature engineering (`Arrival_Hour`, `Peak_Period`, `Long_Wait_Flag`, `High_Congestion_Flag`), descriptive statistics, waiting-time analysis, department comparison, peak-period analysis, and outlier analysis — fully executed with real outputs and 10 exported charts.
+
+## Statistical Analysis
+
+Four questions, each tested with a method chosen for the data's actual (non-normal, right-skewed) distribution rather than defaulting to a t-test/ANOVA:
+
+- **Kruskal-Wallis test** — do departments differ significantly in waiting time? (Yes; used instead of ANOVA because waiting time is heavily right-skewed.)
+- **Spearman correlation** — is queue size associated with waiting time? (Yes, strongly — ρ confirms the Pearson r = 0.92 finding using a method that doesn't assume linearity.)
+- **Mann-Whitney U test** — are peak-period waits significantly longer than non-peak? (Yes.) Are lab-requiring visits significantly longer than non-lab visits? (Yes — expected by construction, but confirmed rather than assumed.)
+
+Full test statistics and p-values are in the notebook, Section 11.
+
+## Key Findings
+
+*(All figures computed directly in `notebooks/hospital_patient_flow_analysis.ipynb`.)*
+
+1. **Waiting time is heavily right-skewed: most patients wait almost no time, but a meaningful minority wait a long time.** Median waiting time is effectively **0 minutes**, while the mean is **13.75 minutes** — and **7.0% of all encounters wait more than 60 minutes**. Reporting only the mean (or only the median) would each tell a misleadingly simple story on their own; both numbers are needed together.
+
+2. **Outpatient Department is the clear priority for intervention — not because visits there take longest, but because congestion there is worst.** OPD has the highest average wait (**24.68 minutes**) and, more importantly, the highest long-wait rate (**14.9%** of OPD patients wait over 60 minutes, vs. under 7% everywhere else). This is a queueing/congestion problem specific to OPD, not a universal hospital problem.
+
+3. **Length of stay and waiting time are different problems, and the department with the longest visits is not the department with the worst waits.** TB/HIV Clinic and Chronic Care have the *longest* average length of stay (129.6 and 127.4 minutes) but comparatively *short* waiting times (7.3 and 10.4 minutes) — their visits are long because of clinical process (high lab/pharmacy requirement rates: 60% and 50% respectively request labs, 90% and 85% need pharmacy), not because patients are stuck in a queue.
+
+4. **The Laboratory is a bigger source of delay than department-level queueing itself.** Average `Laboratory_Wait_Time` is **80–85 minutes** across departments — three to five times larger than the general registration/triage/consultation wait most departments show. For the **44.2%** of patients who need a lab test, median length of stay is **152.8 minutes** versus **46.7 minutes** for those who don't — a gap confirmed statistically significant (Mann-Whitney U, p < 0.001). The shared, hospital-wide lab queue is a structural bottleneck affecting every department, not a department-specific issue.
+
+5. **Triage prioritization is working as intended.** Emergency-priority patients wait an average of **3.79 minutes**, Urgent patients **11.99 minutes**, and Routine patients **15.92 minutes** — the correct ordering, confirmed via Kruskal-Wallis (p < 0.001) rather than assumed from the priority label alone.
+
+6. **Most length-of-stay "outliers" are not data errors — they're genuinely complex encounters.** The IQR rule flagged **4.7%** of encounters as LOS outliers, far more than the ~0.5% deliberately injected as artificial extreme values. Investigating the flagged group directly: **96.8%** required a lab test and **67.6%** required pharmacy (versus 44.2% and 66.8% dataset-wide), and 15.3% were admitted (versus 7.6% dataset-wide) — meaning the IQR rule is mostly catching real patients whose care legitimately took longer (lab + pharmacy + admission), not data-entry mistakes. A hospital manager reviewing "outliers" needs this distinction before assuming they're a records problem to fix.
+
+7. **Peak-period congestion is statistically real, not a visual impression.** Patients arriving during each department's defined peak window wait a median of **11.8 minutes** versus **0 minutes** off-peak (Mann-Whitney U, p < 0.001) — and the hospital-wide peak arrival hour is **8:00 AM**, with **10,240** arrivals logged in that single hour across the year.
+
+## Recommendations
+
+Directly tied to the findings above — not generic hospital-improvement advice:
+
+- **Add registration/triage capacity specifically at Outpatient Department around the 8 AM peak** (Findings #2, #7) — OPD's problem is queueing volume at a known time, which additional short-term staffing at that specific window directly addresses.
+- **Review laboratory staffing/workflow as a hospital-wide priority, not a per-department one** (Finding #4) — since the lab serves all six departments, improving its throughput would reduce delay everywhere at once, likely with more leverage than any single department-level change.
+- **Do not treat TB/HIV Clinic and Chronic Care's long visit durations as a "waiting time" problem** (Finding #3) — their length of stay is driven by legitimate clinical service intensity (lab + pharmacy rates), so the appropriate response is reviewing lab/pharmacy turnaround for those patients specifically, not adding registration or triage staff there.
+- **Use queue size as a real-time operational alert, not just a retrospective metric** (Section 11.2) — because queue size and waiting time are so strongly correlated, and queue size is observable *before* a patient has already waited too long, a simple queue-size threshold alert could let staff intervene proactively.
+- **Don't assume every "outlier" length-of-stay flagged by an automated rule is a data problem** (Finding #6) — build the lab/pharmacy/admission cross-check from this project into any outlier-review workflow before assuming record correction is needed.
+
+## Limitations
+
+- This is a synthetic simulation calibrated to plausible district-hospital parameters, not fitted to real observed data — the *specific* minute values (e.g. "24.68 minutes average OPD wait") are a property of this simulation's parameters, not a measurement of any real hospital.
+- The simulation does not model staff shift changes, absenteeism, equipment downtime, or multi-day patient stays (e.g. multi-night admissions) — all of which affect real hospital patient flow and could change which bottleneck appears largest.
+- Admission "length of stay" here only extends to a bed-arrangement delay (30–120 minutes), not an actual multi-day inpatient stay, since this project focuses on the *outpatient/service* portion of the visit.
+- The peak-period definition is a fixed, pre-specified hour window per department rather than something detected empirically from the data itself — a more advanced version could define peak periods statistically instead.
+
+## Ethical Considerations
+
+The hospital name, all patients, timestamps, and outcomes in this dataset are entirely synthetic and generated programmatically. No real patient data, real hospital records, or real Ministry of Health data were used at any point. This project makes no claim about the operational performance of any real Malawian hospital.
+
+## Tools Used
+
+Python (Pandas, NumPy, Matplotlib, Seaborn, SciPy) · SQL (SQLite) · Jupyter Notebook · Power BI (implementation guide)
+
+## Repository Structure
+
+```
+hospital-patient-flow-analysis/
+├── data/
+│   ├── raw/
+│   │   └── hospital_patient_flow_synthetic.csv   # As generated + injected issues, before cleaning
+│   └── processed/
+│       └── hospital_patient_flow_clean.csv        # Cleaned, feature-engineered (source of truth)
+├── notebooks/
+│   └── hospital_patient_flow_analysis.ipynb       # Full workflow, executed with real outputs
+├── sql/
+│   ├── schema.sql
+│   ├── build_database.py
+│   ├── hospital_patient_flow.db
+│   ├── queries/
+│   │   ├── 01_volume_and_trends.sql
+│   │   ├── 02_waiting_time_analysis.sql
+│   │   └── 03_performance_ranking.sql
+│   └── README.md
+├── dashboard/
+│   └── powerbi_dashboard_guide.md                 # Implementation guide (not yet built)
+├── visuals/
+│   └── charts/                                     # 10 chart exports from the notebook
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
+
+## Installation Instructions
+
+```bash
+git clone <this-repo>
+cd hospital-patient-flow-analysis
+pip install -r requirements.txt
+```
+
+## How to Run the Notebook
+
+```bash
+jupyter notebook notebooks/hospital_patient_flow_analysis.ipynb
+# Run all cells — fixed random seed reproduces the exact same dataset and results,
+# and regenerates data/raw/, data/processed/, and visuals/charts/
+```
+
+## How to Run the SQL Analysis
+
+```bash
+cd sql
+python build_database.py
+sqlite3 hospital_patient_flow.db < queries/01_volume_and_trends.sql
+# or open hospital_patient_flow.db in DB Browser for SQLite / any SQLite client
+```
+
+## How to Reproduce the Dataset
+
+The dataset is generated entirely within Section 1 of the notebook using `np.random.seed(42)` — running the notebook end-to-end regenerates byte-for-byte the same raw and cleaned datasets referenced throughout this README.
+
+## Disclaimer
+
+**All data, patients, timestamps, and findings in this project are synthetic and generated for educational and portfolio purposes.** "Chilungamo District Hospital" is a fictional institution. Nothing in this repository represents real patients, real hospital operations, or real Ministry of Health data, and no figures here should be interpreted as describing any actual healthcare facility in Malawi or elsewhere.
+
+## Portfolio Positioning
+
+Demonstrates: SQL (JOINs, CTEs, window functions) · Python/Pandas · data cleaning and data-quality investigation · statistical analysis (non-parametric testing, chosen deliberately for the data's actual distribution) · healthcare and operational analytics · data visualization · Power BI dashboard design · business/management reporting · problem-solving (including a documented, real bug found and fixed in the SQL layer). Machine learning is deliberately not the focus of this project — see Project 2 for a modest, explainable classifier, and later portfolio projects for a deeper ML focus.
+
+## Author
+
+Chico Mkandawire
+MSc Data Science, Malawi University of Science and Technology (in progress)
+BSc Management Information Systems, Malawi University of Business and Applied Sciences

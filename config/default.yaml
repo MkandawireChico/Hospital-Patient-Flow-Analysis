@@ -1,0 +1,71 @@
+project:
+  name: "Chilungamo District Hospital"
+  synthetic: true
+  random_seed: 42
+
+paths:
+  raw: "data/raw/hospital_patient_flow_synthetic.csv"
+  processed: "data/processed/hospital_patient_flow_clean.csv"
+
+simulation:
+  departments:
+    Outpatient Department:
+      daily_mean: 45
+      open: [7, 16]
+      peak: [8, 9]
+      night: false
+    Emergency:
+      daily_mean: 16
+      open: [0, 24]
+      peak: [18, 21]
+      night: true
+    Maternal Health:
+      daily_mean: 11
+      open: [7, 16]
+      peak: [8, 9]
+      night: false
+    Paediatrics:
+      daily_mean: 22
+      open: [7, 16]
+      peak: [8, 9]
+      night: false
+    Chronic Care:
+      daily_mean: 9
+      open: [7, 15]
+      peak: [8, 9]
+      night: false
+    TB/HIV Clinic:
+      daily_mean: 8
+      open: [7, 15]
+      peak: [8, 9]
+      night: false
+
+  staffing:
+    registration_clerks: 2
+    triage_nurses: 2
+    doctors:
+      Outpatient Department: 2
+      Emergency: 2
+      Maternal Health: 2
+      Paediatrics: 2
+      Chronic Care: 1
+      TB/HIV Clinic: 1
+    lab_techs: 3
+    pharmacists: 4
+
+  lab:
+    request_share: 0.42
+    service_mean: 45
+    service_mode: "triangular"
+
+  pharmacy:
+    request_share: 0.66
+    service_mean: 20
+
+  weekend_multiplier: 0.8
+  issue_injection:
+    duplicate_rate: 0.01
+    department_error_rate: 0.003
+    impossible_timestamp_rate: 0.002
+    negative_wait_rate: 0.001
+    los_outlier_rate: 0.02
