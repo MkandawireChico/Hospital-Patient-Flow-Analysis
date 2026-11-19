@@ -21,7 +21,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from patient_flow.analysis import filter_analysis_frame, LONG_WAIT_THRESHOLD_MINUTES
+from patient_flow.analysis import LONG_WAIT_THRESHOLD_MINUTES, filter_analysis_frame
 
 
 DEFAULT_FEATURES = [
