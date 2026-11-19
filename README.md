@@ -21,38 +21,58 @@
 
 > **Explore the deployed application:** [hospital-operations-command-centre.streamlit.app](https://hospital-operations-command-centre.streamlit.app/). The dashboard brings patient-flow analytics, workforce coverage, role-based establishment and MWK budget planning into one interactive command centre.
 
-## Visual preview
+## Application screenshots
 
-The charts below are reproducible analysis outputs from the repository. The live application adds interactive filters, patient-flow drill-downs, workforce and roster analytics, shift coverage, capacity sensitivity, and an MWK staffing budget planner.
+The screenshots below show the deployed application’s main analytical and workforce-planning views. Select **Open the live command centre** to explore the interactive filters, charts and planning controls.
 
 <p align="center">
-  <a href="https://hospital-operations-command-centre.streamlit.app/"><strong>Open the interactive command centre →</strong></a>
+  <a href="https://hospital-operations-command-centre.streamlit.app/"><strong>▶ Open the live Hospital Operations Command Centre</strong></a>
 </p>
 
 <table>
   <tr>
     <td width="50%">
-      <strong>Waiting-time distribution</strong><br>
-      <img src="visuals/charts/01_waiting_time_distribution.png" alt="Distribution of valid patient waiting times">
+      <strong>1. Operations command centre</strong><br>
+      <a href="docs/images/01-command-centre-overview.jpg.png"><img src="docs/images/01-command-centre-overview.jpg.png" alt="Hospital operations command centre overview" width="100%"></a>
     </td>
     <td width="50%">
-      <strong>Department-level waiting times</strong><br>
-      <img src="visuals/charts/02_avg_waiting_time_by_department.png" alt="Waiting-time comparison by department">
+      <strong>2. Department bottleneck analysis</strong><br>
+      <a href="docs/images/02-department-bottleneck.jpg.png"><img src="docs/images/02-department-bottleneck.jpg.png" alt="Department bottleneck analysis" width="100%"></a>
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <strong>Arrival patterns</strong><br>
-      <img src="visuals/charts/06_arrivals_by_hour.png" alt="Patient arrivals by hour">
+      <strong>3. Congestion and demand heatmap</strong><br>
+      <a href="docs/images/002-congestion-heatmap.jpg.png"><img src="docs/images/002-congestion-heatmap.jpg.png" alt="Congestion and demand heatmap" width="100%"></a>
     </td>
     <td width="50%">
-      <strong>Patient volumes</strong><br>
-      <img src="visuals/charts/04_patient_volume_by_department.png" alt="Patient volume by department">
+      <strong>4. Predictive analytics</strong><br>
+      <a href="docs/images/04-predictive-analytics.jpg.png"><img src="docs/images/04-predictive-analytics.jpg.png" alt="Long-wait predictive analytics model results" width="100%"></a>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>5. Workforce overview</strong><br>
+      <a href="docs/images/05-workforce-overview.jpg.png"><img src="docs/images/05-workforce-overview.jpg.png" alt="Staff workforce overview" width="100%"></a>
+    </td>
+    <td width="50%">
+      <strong>6. Workforce coverage</strong><br>
+      <a href="docs/images/008-wokeforce-coverage.jpg.png"><img src="docs/images/008-wokeforce-coverage.jpg.png" alt="Workforce coverage analytics" width="100%"></a>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>7. Hospital-wide staff schedule</strong><br>
+      <a href="docs/images/07-hospital-wide-schedule.jpg.png"><img src="docs/images/07-hospital-wide-schedule.jpg.png" alt="Hospital-wide staff shift schedule" width="100%"></a>
+    </td>
+    <td width="50%">
+      <strong>8. Capacity planning</strong><br>
+      <a href="docs/images/08-capacity-centre-overview.jpg.png"><img src="docs/images/08-capacity-centre-overview.jpg.png" alt="Workforce capacity sensitivity and planning view" width="100%"></a>
     </td>
   </tr>
 </table>
 
-*These are static analytical chart exports; use the live application for interactive exploration and the Workforce & Roster page.*
+[Browse all uploaded application screenshots](docs/images/).
 
 ## At a glance
 
