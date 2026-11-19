@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import Any
 
 import pandas as pd
+
+from patient_flow.analysis import LONG_WAIT_THRESHOLD_MINUTES, filter_analysis_frame
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
@@ -20,10 +22,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from patient_flow.analysis import LONG_WAIT_THRESHOLD_MINUTES, filter_analysis_frame
 
-
-TARGET_COLUMN = "Long_Wait_Target"
 DEFAULT_FEATURES = [
     "Department",
     "Priority_Level",
@@ -60,7 +59,7 @@ def prepare_prediction_frame(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]
         if "Arrival_Time" in analysis.columns:
             analysis["Arrival_Day_Of_Week"] = pd.to_datetime(
                 analysis["Arrival_Time"], errors="coerce"
-            ).dt.dayofweek
+            ).dt.day_of_week
         elif "Visit_Date" in analysis.columns:
             analysis["Arrival_Day_Of_Week"] = pd.to_datetime(
                 analysis["Visit_Date"], errors="coerce"
