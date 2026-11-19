@@ -84,6 +84,14 @@ python -m patient_flow.cli run
 streamlit run dashboard/app.py
 ```
 
+## Predictive modelling
+
+The dashboard includes an optional logistic-regression baseline for classifying encounters that exceed the 60-minute long-wait threshold. It uses a stratified train/test split and reports ROC AUC, average precision, precision, recall, F1, a confusion matrix, an ROC curve, and encoded feature coefficients.
+
+Predictors are limited to pre-outcome encounter descriptors and arrival-time features (department, recorded priority, visit type, arrival hour, day of week, and month where available). Wait components, total waiting time, length of stay, and disposition are deliberately excluded from the feature matrix to reduce target leakage. Coefficients are associations in the fitted model, not causal effects.
+
+This is an exploratory baseline on synthetic data. It has not been externally validated, calibrated for a real facility, or assessed for fairness or clinical utility. It must not be used to prioritise real patients or make clinical decisions.
+
 ## Local budget planning in Malawi Kwacha (MWK)
 
 The interactive dashboard includes an incremental staffing budget planner denominated entirely in **MWK**. Users enter:
