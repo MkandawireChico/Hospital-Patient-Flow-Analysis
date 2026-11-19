@@ -104,3 +104,43 @@ def test_missing_service_stage_columns_do_not_break_workforce_coverage() -> None
     result = build_demand_coverage(encounters, roster)
     assert result["Demand_Events"].sum() == 1
     assert result["Department"].tolist() == ["Emergency"]
+
+
+def test_capacity_sensitivity_calculates_added_hours_and_mwk_budget() -> None:
+    from patient_flow.capacity import build_capacity_sensitivity
+
+    coverage = pd.DataFrame({
+        "Department": ["Laboratory", "Laboratory"],
+        "Demand_Events": [40, 60],
+        "Scheduled_Hours": [80, 80],
+    })
+    result = build_capacity_sensitivity(
+        coverage,
+        workforce_unit="Laboratory",
+        additional_fte=1.0,
+        monthly_cost_per_fte_mwk=500_000,
+        period_months=1.0,
+        monthly_hours_per_fte=160,
+    )
+    assert result["demand_events"] == 100
+    assert result["current_scheduled_hours"] == 160
+    assert result["additional_hours_in_period"] == 160
+    assert result["baseline_demand_events_per_scheduled_hour"] == 0.625
+    assert result["scenario_demand_events_per_scheduled_hour"] == 0.3125
+    assert result["incremental_period_budget_mwk"] == 500_000
+
+
+def test_capacity_sensitivity_rejects_negative_or_missing_workforce_unit() -> None:
+    import pytest
+
+    from patient_flow.capacity import build_capacity_sensitivity
+
+    coverage = pd.DataFrame({
+        "Department": ["Emergency"],
+        "Demand_Events": [10],
+        "Scheduled_Hours": [80],
+    })
+    with pytest.raises(ValueError, match="cannot be negative"):
+        build_capacity_sensitivity(coverage, "Emergency", -1, 0, 1)
+    with pytest.raises(ValueError, match="No demand-coverage records"):
+        build_capacity_sensitivity(coverage, "Laboratory", 1, 0, 1)
