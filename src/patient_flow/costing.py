@@ -6,7 +6,7 @@ import pandas as pd
 
 
 def calculate_staffing_budget(
-    staffing: Mapping[str, Mapping[str, float | int]],
+    staffing: Mapping[str, Mapping[str, float | int | str]],
     months: int = 12,
 ) -> pd.DataFrame:
     """Calculate an illustrative incremental staffing budget in Malawi Kwacha (MWK).
@@ -40,6 +40,8 @@ def calculate_staffing_budget(
                 "monthly_total_mwk": monthly_total,
                 "budget_period_months": months,
                 "period_total_mwk": monthly_total * months,
+                "cost_source": str(values.get("cost_source", "")),
+                "effective_date": str(values.get("effective_date", "")),
             }
         )
 
@@ -52,6 +54,8 @@ def calculate_staffing_budget(
             "monthly_total_mwk",
             "budget_period_months",
             "period_total_mwk",
+            "cost_source",
+            "effective_date",
         ],
     )
 
