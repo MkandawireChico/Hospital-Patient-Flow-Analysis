@@ -154,6 +154,11 @@ def test_service_wait_summary_maps_stage_waits_to_workforce_units() -> None:
 
     encounters = pd.DataFrame({
         "Department": ["Outpatient Department", "Emergency", "Outpatient Department"],
+        "Arrival_Time": [
+            "2026-01-01 08:00:00",
+            "2026-01-01 16:00:00",
+            "2026-01-01 23:30:00",
+        ],
         "Wait_For_Consultation_Min": [20.0, 80.0, 40.0],
         "Laboratory_Wait_Time": [100.0, None, 0.0],
         "Pharmacy_Wait_Time": [None, 75.0, 0.0],
