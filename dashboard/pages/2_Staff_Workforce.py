@@ -80,7 +80,7 @@ if not coverage_view.empty:
         )
         st.plotly_chart(px.bar(workload, x="Department", y="Demand_Events", color="Shift", barmode="group", title="Encounter and service-stage demand by shift"), use_container_width=True)
 
-    valid_workload = coverage_view.dropna(subset=["Encounters_Per_Staff"])
+    valid_workload = coverage_view.dropna(subset=["Demand_Events_Per_Staff"])
     if not valid_workload.empty:
         st.plotly_chart(
             px.box(valid_workload, x="Department", y="Encounters_Per_Staff", color="Shift",
