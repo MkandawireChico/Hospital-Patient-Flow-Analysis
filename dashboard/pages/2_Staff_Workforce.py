@@ -71,14 +71,14 @@ st.caption("Arrival counts are aligned to the roster date, department and shift.
 if not coverage_view.empty:
     demand_left, demand_right = st.columns(2)
     with demand_left:
-        daily_demand = coverage_view.groupby(["Roster_Date", "Department"], as_index=False)["Encounter_Arrivals"].sum()
-        st.plotly_chart(px.line(daily_demand, x="Roster_Date", y="Encounter_Arrivals", color="Department", title="Daily arrivals by department"), use_container_width=True)
+        daily_demand = coverage_view.groupby(["Roster_Date", "Department"], as_index=False)["Demand_Events"].sum()
+        st.plotly_chart(px.line(daily_demand, x="Roster_Date", y="Demand_Events", color="Department", title="Daily demand events by workforce unit"), use_container_width=True)
     with demand_right:
         workload = coverage_view.groupby(["Department", "Shift"], as_index=False).agg(
-            Encounters=("Encounter_Arrivals", "sum"),
+            Demand_Events=("Demand_Events", "sum"),
             Mean_Staff=("Staff_On_Duty", "mean"),
         )
-        st.plotly_chart(px.bar(workload, x="Department", y="Encounters", color="Shift", barmode="group", title="Encounter arrivals by department and shift"), use_container_width=True)
+        st.plotly_chart(px.bar(workload, x="Department", y="Demand_Events", color="Shift", barmode="group", title="Encounter and service-stage demand by shift"), use_container_width=True)
 
     valid_workload = coverage_view.dropna(subset=["Encounters_Per_Staff"])
     if not valid_workload.empty:
@@ -89,12 +89,12 @@ if not coverage_view.empty:
             use_container_width=True,
         )
     daily_staffing = coverage_view.groupby(["Roster_Date", "Department"], as_index=False).agg(
-        Encounter_Arrivals=("Encounter_Arrivals", "sum"),
+        Demand_Events=("Demand_Events", "sum"),
         Staff_On_Duty=("Staff_On_Duty", "sum"),
     )
-    heat = daily_staffing.pivot(index="Department", columns="Roster_Date", values="Encounter_Arrivals").fillna(0)
+    heat = daily_staffing.pivot(index="Department", columns="Roster_Date", values="Demand_Events").fillna(0)
     st.plotly_chart(px.imshow(heat, aspect="auto", color_continuous_scale="Blues",
-                              labels={"x": "Roster date", "y": "Department", "color": "Arrivals"},
+                              labels={"x": "Roster date", "y": "Workforce unit", "color": "Demand events"},
                               title="Department arrival intensity across the roster period"),
                     use_container_width=True)
     st.dataframe(coverage_view, use_container_width=True, hide_index=True)
