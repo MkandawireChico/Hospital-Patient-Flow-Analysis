@@ -105,6 +105,10 @@ streamlit run dashboard/app.py
 
 Alternatively, use `make dashboard` where Make is available. The dashboard reads `data/processed/hospital_patient_flow_clean.csv`; rerun the pipeline after changing the source data. Every dashboard view retains the synthetic-data disclaimer. Scenario comparisons are illustrative what-if calculations, not causal estimates or operational forecasts.
 
+### Budget planning in Malawi Kwacha (MWK)
+
+The dashboard includes a staffing budget planner denominated in **MWK**. Enter locally verified monthly fully loaded staff costs and additional FTE assumptions to calculate monthly and multi-month staffing budgets. No USD conversion or unverified salary estimates are built in. The dashboard also offers optional 95% bootstrap confidence intervals for median wait, P90 wait, and long-wait share.
+
 ## Power BI
 
 [`dashboard/powerbi_dashboard_guide.md`](dashboard/powerbi_dashboard_guide.md) documents a dashboard design based on the processed data and generated outputs, including model considerations, measures, report views, and filters. It does not present simulated results as real clinical evidence.
