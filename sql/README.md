@@ -13,6 +13,8 @@ A small relational SQLite database built from the cleaned dataset, plus 17 analy
 | `queries/02_waiting_time_analysis.sql` | Average/median wait, long-wait patients, by priority/age/department |
 | `queries/03_performance_ranking.sql` | Consultation duration, length of stay, department ranking, doctor workload |
 
+Department handling note: Python baseline tables retain `Unknown` as a separate data-quality category so the affected encounters remain visible for audit. SQL department-level rankings exclude `Unknown`, because it is not a valid clinical department. Do not compare those department totals without accounting for this difference.
+
 ## A real bug this project caught — and why the fix matters
 
 While building the `doctors` dimension table, joining it naively to `Department` from the flat encounter table produced doctors who appeared to work across multiple departments (e.g. `DOC-EMG-1` showing up under Emergency, Paediatrics, *and* "Unknown"). That wasn't a coding mistake in the join — it was the **injected "incorrect department value" data-quality problem** (see the notebook, Section 2) leaking into a dimension table: ~0.3% of encounter rows have a corrupted `Department` value, but their `Doctor_ID` is untouched, so building the doctors table from the raw `Department` column inherited that corruption.
