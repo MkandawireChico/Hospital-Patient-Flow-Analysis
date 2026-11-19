@@ -170,8 +170,11 @@ def test_service_wait_summary_maps_stage_waits_to_workforce_units() -> None:
         result["Workforce_Unit"].eq("Outpatient Department")
         & result["Service_Stage"].eq("Consultation")
     ].iloc[0]
-    assert lab["Service_Events"] == 2
-    assert lab["P90_Wait_Min"] == 90
-    assert pharmacy["Service_Events"] == 2
-    assert admin["Service_Events"] == 3
-    assert opd["Service_Events"] == 2
+    assert lab["Service_Events"] == 1
+    assert lab["Shift"] == "DAY"
+    assert lab["P90_Wait_Min"] == 100
+    assert pharmacy["Service_Events"] == 1
+    assert pharmacy["Shift"] == "EVENING"
+    assert admin["Service_Events"] == 1
+    assert opd["Service_Events"] == 1
+    assert opd["Shift"] == "DAY"
