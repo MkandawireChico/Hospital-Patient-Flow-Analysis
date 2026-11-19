@@ -4,7 +4,7 @@ import heapq
 from pathlib import Path
 from typing import Any
 
-import patient_flow.config as config_module
+from . import config as config_module
 
 import numpy as np
 import pandas as pd
