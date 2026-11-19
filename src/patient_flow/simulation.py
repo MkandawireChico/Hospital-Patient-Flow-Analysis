@@ -4,10 +4,10 @@ import heapq
 from pathlib import Path
 from typing import Any
 
-from . import config as config_module
-
 import numpy as np
 import pandas as pd
+
+from . import config as config_module
 
 
 AGE_GROUPS = ["0-4", "5-14", "15-24", "25-44", "45-64", "65+"]
