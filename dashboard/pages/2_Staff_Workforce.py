@@ -23,7 +23,7 @@ from patient_flow.workforce import (  # noqa: E402
 
 st.set_page_config(page_title="Workforce & Roster", page_icon="👥", layout="wide")
 st.title("Workforce & Roster Intelligence")
-st.caption("Workforce composition, scheduled coverage and patient-arrival workload analysis")
+st.caption("Workforce composition, scheduled coverage, service demand and capacity sensitivity")
 
 if not STAFF_PATH.exists():
     st.error("Staff directory is missing. Check data/reference/staff_directory_synthetic.csv.")
