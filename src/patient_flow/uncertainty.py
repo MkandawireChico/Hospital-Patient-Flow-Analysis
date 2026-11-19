@@ -3,6 +3,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from patient_flow.analysis import LONG_WAIT_THRESHOLD_MINUTES
+
 
 def bootstrap_wait_confidence_intervals(
     waits: pd.Series,
@@ -39,7 +41,7 @@ def bootstrap_wait_confidence_intervals(
     draws = rng.choice(values, size=(n_bootstrap, sample_size), replace=True)
     median_draws = np.median(draws, axis=1)
     p90_draws = np.quantile(draws, 0.90, axis=1)
-    long_wait_draws = np.mean(draws > 60.0, axis=1) * 100
+    long_wait_draws = np.mean(draws > LONG_WAIT_THRESHOLD_MINUTES, axis=1) * 100
 
     alpha = (1.0 - confidence_level) / 2.0
 
