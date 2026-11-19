@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 
 import pandas as pd
@@ -9,19 +10,15 @@ def calculate_staffing_budget(
     staffing: Mapping[str, Mapping[str, float | int | str]],
     months: int = 12,
 ) -> pd.DataFrame:
-    """Calculate an illustrative incremental staffing budget in Malawi Kwacha (MWK).
+    """Calculate an incremental role-level staffing budget in Malawi Kwacha (MWK).
 
-    Each role entry must contain:
-      - additional_staff: additional full-time-equivalent staff
-      - monthly_cost_mwk: verified or explicitly assumed fully loaded monthly cost per person
-
-    This function does not fetch, infer, or convert exchange rates. Costs are supplied by the
-    user and should be checked against current local salary scales and employer on-costs.
+    Each role entry contains additional FTE, monthly fully loaded cost per FTE,
+    and optional cost provenance. No salary benchmarks or exchange rates are inferred.
     """
     if isinstance(months, bool) or not isinstance(months, int) or months < 1:
         raise ValueError("months must be a positive integer")
 
-    rows: list[dict[str, float | int | str]] = []
+    rows: list[dict[str, float | int | str | bool]] = []
     for role, values in staffing.items():
         if "additional_staff" not in values or "monthly_cost_mwk" not in values:
             raise ValueError(
@@ -29,14 +26,15 @@ def calculate_staffing_budget(
             )
         additional_staff = float(values["additional_staff"])
         monthly_cost = float(values["monthly_cost_mwk"])
+        if not math.isfinite(additional_staff) or not math.isfinite(monthly_cost):
+            raise ValueError("Staff counts and monthly costs must be finite numbers")
         if additional_staff < 0 or monthly_cost < 0:
             raise ValueError("Staff counts and monthly costs cannot be negative")
         monthly_total = additional_staff * monthly_cost
         cost_source = str(values.get("cost_source", "")).strip()
         effective_date = str(values.get("effective_date", "")).strip()
-        date_is_valid = bool(effective_date) and pd.notna(
-            pd.to_datetime(effective_date, errors="coerce")
-        )
+        parsed_date = pd.to_datetime(effective_date, errors="coerce")
+        date_is_valid = bool(effective_date) and pd.notna(parsed_date)
         rows.append(
             {
                 "role": str(role),
