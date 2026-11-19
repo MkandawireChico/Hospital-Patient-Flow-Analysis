@@ -66,8 +66,8 @@ if not summary_view.empty:
     dept_coverage = summary_view.groupby(["Department", "Shift"], as_index=False)["Staff_On_Duty"].mean()
     st.plotly_chart(px.bar(dept_coverage, x="Department", y="Staff_On_Duty", color="Shift", barmode="group", title="Average scheduled staff by department and shift"), use_container_width=True)
 
-st.subheader("Patient arrivals and workforce coverage")
-st.caption("Arrival counts are aligned to the roster date, department and shift. Encounters per staff member is a workload indicator; it is not a validated capacity or staffing-safety measure.")
+st.subheader("Service demand and workforce coverage")
+st.caption("Clinical demand uses encounter department. Laboratory and pharmacy demand use recorded stage-use fields; registration demand maps to Administration. Events are grouped by patient arrival shift as a timing proxy, not verified service-start shift. Workload ratios are descriptive, not validated capacity or staffing-safety measures.")
 if not coverage_view.empty:
     demand_left, demand_right = st.columns(2)
     with demand_left:
@@ -84,7 +84,7 @@ if not coverage_view.empty:
     if not valid_workload.empty:
         st.plotly_chart(
             px.box(valid_workload, x="Department", y="Encounters_Per_Staff", color="Shift",
-                   title="Distribution of encounters per rostered staff member and shift",
+                   title="Distribution of demand events per rostered staff member and shift",
                    points=False),
             use_container_width=True,
         )
@@ -95,13 +95,13 @@ if not coverage_view.empty:
     heat = daily_staffing.pivot(index="Department", columns="Roster_Date", values="Demand_Events").fillna(0)
     st.plotly_chart(px.imshow(heat, aspect="auto", color_continuous_scale="Blues",
                               labels={"x": "Roster date", "y": "Workforce unit", "color": "Demand events"},
-                              title="Department arrival intensity across the roster period"),
+                              title="Workforce-unit demand intensity across the roster period"),
                     use_container_width=True)
     st.dataframe(coverage_view, use_container_width=True, hide_index=True)
     st.download_button("Download demand and coverage analysis", coverage_view.to_csv(index=False).encode("utf-8"),
                        "workforce_demand_coverage.csv", "text/csv")
 else:
-    st.info("No patient arrivals could be aligned to the selected departments and roster dates.")
+    st.info("No demand events could be aligned to the selected workforce units and roster dates.")
 
 st.subheader("Staff directory")
 st.dataframe(staff_view, use_container_width=True, hide_index=True)
