@@ -42,7 +42,7 @@ This is a transparent arithmetic sensitivity exercise. It does not model staff s
 
 The optional predictive baseline defines the target as a valid total wait strictly greater than 60 minutes. It uses a stratified random hold-out split and a class-weighted logistic regression. Numeric arrival-time features are median-imputed and standardised; categorical encounter descriptors are imputed and one-hot encoded.
 
-Eligible features are department, priority, visit type, arrival hour, arrival weekday, and arrival month where available. Total wait, stage waits, length of stay, disposition, and post-outcome variables are excluded to reduce leakage. The dashboard reports ROC AUC, average precision, precision, recall, F1, a confusion matrix, an ROC curve, and logistic-regression coefficients.
+Eligible features are department, visit type, arrival hour, arrival weekday, and arrival month where available. Triage priority is excluded because it may be assigned after the waiting-time clock has started. Total wait, stage waits, length of stay, disposition, and post-outcome variables are excluded to reduce leakage. The dashboard reports ROC AUC, average precision, precision, recall, F1, a confusion matrix, an ROC curve, and logistic-regression coefficients.
 
 This is an exploratory baseline, not a deployment-ready risk score. A real-world application would require temporal and external validation, calibration, subgroup performance and fairness analysis, clinical governance, and a clear human decision process. The model must not be used for clinical triage or patient prioritisation.
 
