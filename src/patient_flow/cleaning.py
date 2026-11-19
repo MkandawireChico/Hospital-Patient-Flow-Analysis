@@ -55,17 +55,6 @@ def standardise_departments(df: pd.DataFrame) -> pd.DataFrame:
 def flag_impossible_timestamps(df: pd.DataFrame) -> pd.DataFrame:
     """Flag visit stages that begin before the patient arrives or end before they start."""
     output = df.copy()
-    timestamp_cols = [
-        "Arrival_Time",
-        "Registration_Start_Time",
-        "Registration_End_Time",
-        "Triage_Start_Time",
-        "Triage_End_Time",
-        "Consultation_Start_Time",
-        "Consultation_End_Time",
-        "Final_Stage_End_Time",
-    ]
-
     output["Impossible_Timestamp_Flag"] = False
     for start_name, end_name in [
         ("Arrival_Time", "Registration_Start_Time"),
