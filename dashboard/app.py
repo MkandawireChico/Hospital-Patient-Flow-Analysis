@@ -564,6 +564,14 @@ def main() -> None:
     budget_kpis[0].metric("Monthly incremental budget", format_mwk(monthly_budget))
     budget_kpis[1].metric(f"{int(budget_months)}-month budget", format_mwk(period_budget))
     budget_kpis[2].metric("Additional staff (FTE)", f"{budget['additional_staff'].sum():,.1f}")
+    incomplete_costs = budget.loc[
+        (budget["monthly_cost_per_person_mwk"] > 0) & ~budget["assumption_complete"]
+    ]
+    if not incomplete_costs.empty:
+        st.warning(
+            "Some non-zero cost assumptions are missing a source or a valid effective date. "
+            "Treat the budget as provisional until these details are completed."
+        )
     if monthly_budget == 0:
         st.info("Enter verified monthly staff costs and additional FTE assumptions to calculate a budget.")
     else:
