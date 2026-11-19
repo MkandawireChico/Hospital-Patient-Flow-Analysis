@@ -111,12 +111,14 @@ def test_capacity_sensitivity_calculates_added_hours_and_mwk_budget() -> None:
 
     coverage = pd.DataFrame({
         "Department": ["Laboratory", "Laboratory"],
+        "Shift": ["DAY", "DAY"],
         "Demand_Events": [40, 60],
         "Scheduled_Hours": [80, 80],
     })
     result = build_capacity_sensitivity(
         coverage,
         workforce_unit="Laboratory",
+        shift="DAY",
         additional_fte=1.0,
         monthly_cost_per_fte_mwk=500_000,
         period_months=1.0,
@@ -137,13 +139,14 @@ def test_capacity_sensitivity_rejects_negative_or_missing_workforce_unit() -> No
 
     coverage = pd.DataFrame({
         "Department": ["Emergency"],
+        "Shift": ["DAY"],
         "Demand_Events": [10],
         "Scheduled_Hours": [80],
     })
     with pytest.raises(ValueError, match="cannot be negative"):
-        build_capacity_sensitivity(coverage, "Emergency", -1, 0, 1)
+        build_capacity_sensitivity(coverage, "Emergency", "DAY", -1, 0, 1)
     with pytest.raises(ValueError, match="No demand-coverage records"):
-        build_capacity_sensitivity(coverage, "Laboratory", 1, 0, 1)
+        build_capacity_sensitivity(coverage, "Laboratory", "DAY", 1, 0, 1)
 
 
 def test_service_wait_summary_maps_stage_waits_to_workforce_units() -> None:
