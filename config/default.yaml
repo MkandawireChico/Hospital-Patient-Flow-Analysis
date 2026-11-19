@@ -160,8 +160,13 @@ simulation:
       maximum_wait_penalty: 4
       admission_penalty: 0.4
       noise_standard_deviation: 0.6
+      score_bounds: [1, 5]
 
   arrival_patterns:
+    daytime_hour_weights:
+      default: 1.0
+      peak: 4.0
+    arrival_minute_bounds: [0, 59]
     emergency_hour_weights:
       default: 1.0
       evening_peak: 2.5
@@ -187,3 +192,6 @@ simulation:
       los_outliers: 50
       department_errors: 60
     department_error_values: ["OPD ", "emergency", "Unknown", "PAEDS", "Outpatient department"]
+    impossible_timestamp_offset_minutes: 15
+    negative_wait_magnitude_minutes: [1, 20]
+    los_outlier_multiplier: [5, 8]
