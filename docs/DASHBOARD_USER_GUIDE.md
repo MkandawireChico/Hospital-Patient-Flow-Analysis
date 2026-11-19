@@ -46,7 +46,7 @@ The classifier is an exploratory synthetic-data demonstration, not a clinical de
 
 ## Enter local costs in MWK
 
-The staffing budget planner starts at zero intentionally. For each role, enter the additional FTE and fully loaded monthly cost per person in Malawi Kwacha. Select the budget period. The dashboard calculates:
+The staffing budget planner starts at zero intentionally. For each role, enter the additional FTE, fully loaded monthly cost per person in Malawi Kwacha, the cost source/payroll reference, and its effective date. Select the budget period. Non-zero cost assumptions without a source and valid effective date are flagged as provisional. The dashboard calculates:
 
 `Monthly budget = Additional FTE × Monthly fully loaded cost per person`
 
