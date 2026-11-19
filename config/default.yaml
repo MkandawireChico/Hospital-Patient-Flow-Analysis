@@ -170,6 +170,7 @@ simulation:
       early_morning_hours: [0, 1, 2, 3, 4]
 
   issue_injection:
+    random_seed: 1042
     missing_satisfaction_rate: 0.025
     missing_referral_rate: 0.025
     duplicate_rate: 0.01
