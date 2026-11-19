@@ -180,8 +180,15 @@ def build_demand_coverage(
 
 
 def build_service_wait_summary(encounters: pd.DataFrame) -> pd.DataFrame:
-    """Summarise observed stage waits against the workforce unit serving each stage."""
+    """Summarise observed stage waits by serving workforce unit and arrival shift."""
     analysis = filter_analysis_frame(encounters)
+    if "Arrival_Time" not in analysis.columns:
+        return pd.DataFrame(columns=[
+            "Workforce_Unit", "Shift", "Service_Stage", "Service_Events",
+            "Median_Wait_Min", "P90_Wait_Min", "Long_Wait_Over_60_Pct",
+        ])
+    arrival = pd.to_datetime(analysis["Arrival_Time"], errors="coerce")
+    analysis = analysis.assign(Shift=assign_arrival_shift(arrival.dt.hour))
     stage_specs = [
         ("Wait_For_Consultation_Min", "Consultation", "Department"),
         ("Laboratory_Wait_Time", "Laboratory", "Laboratory"),
@@ -193,17 +200,22 @@ def build_service_wait_summary(encounters: pd.DataFrame) -> pd.DataFrame:
         if column not in analysis.columns:
             continue
         values = pd.to_numeric(analysis[column], errors="coerce")
-        frame = analysis.assign(_Stage_Wait=values).dropna(subset=["_Stage_Wait"])
+        frame = analysis.assign(_Stage_Wait=values).dropna(
+            subset=["_Stage_Wait", "Shift"]
+        )
         if unit_source == "Department":
             frame = frame.dropna(subset=["Department"]).assign(
                 Workforce_Unit=frame["Department"].astype("string")
             )
         else:
             frame = frame.assign(Workforce_Unit=unit_source)
-        for unit, group in frame.groupby("Workforce_Unit", dropna=True, sort=True):
+        for (unit, shift), group in frame.groupby(
+            ["Workforce_Unit", "Shift"], dropna=True, sort=True
+        ):
             waits = group["_Stage_Wait"]
             rows.append({
                 "Workforce_Unit": str(unit),
+                "Shift": str(shift),
                 "Service_Stage": stage,
                 "Service_Events": int(waits.count()),
                 "Median_Wait_Min": float(waits.median()),
@@ -212,12 +224,15 @@ def build_service_wait_summary(encounters: pd.DataFrame) -> pd.DataFrame:
             })
     return pd.DataFrame(rows, columns=[
         "Workforce_Unit",
+        "Shift",
         "Service_Stage",
         "Service_Events",
         "Median_Wait_Min",
         "P90_Wait_Min",
         "Long_Wait_Over_60_Pct",
-    ]).sort_values(["Workforce_Unit", "Service_Stage"]).reset_index(drop=True)
+    ]).sort_values(
+        ["Workforce_Unit", "Shift", "Service_Stage"]
+    ).reset_index(drop=True)
 
 
 
