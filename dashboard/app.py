@@ -187,7 +187,7 @@ def main() -> None:
         )
         st.caption(
             f"Percentile bootstrap, 500 replicates, {intervals['observations_used']:,} observations "
-            "used. Intervals reflect sampling variation within this synthetic cohort only; they "
+            "used. Intervals describe sampling variation in the selected case-study cohort; they "
             "do not capture uncertainty in the simulation assumptions."
         )
 
@@ -537,7 +537,7 @@ def main() -> None:
             st.plotly_chart(chart, use_container_width=True)
             st.caption(
                 "Coefficients describe model associations on the log-odds scale, not causal effects. "
-                "This is a single stratified hold-out evaluation on synthetic data; performance "
+                "This is a single stratified hold-out evaluation on the case-study dataset; performance "
                 "does not establish readiness for clinical or operational deployment."
             )
         except ValueError as exc:
