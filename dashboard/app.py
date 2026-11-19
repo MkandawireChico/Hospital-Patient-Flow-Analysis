@@ -22,6 +22,7 @@ from patient_flow.analysis import (  # noqa: E402
 )
 from patient_flow.costing import calculate_staffing_budget, format_mwk  # noqa: E402
 from patient_flow.flags import boolean_flag_column  # noqa: E402
+from patient_flow.prediction import train_long_wait_model  # noqa: E402
 from patient_flow.scenarios import (  # noqa: E402
     build_scenario_comparison,
     build_scenario_department_effects,
@@ -65,6 +66,16 @@ def add_empty_state(message: str) -> None:
 @st.cache_data(show_spinner="Calculating bootstrap confidence intervals…")
 def cached_bootstrap_intervals(values: tuple[float, ...]) -> dict[str, float | int]:
     return bootstrap_wait_confidence_intervals(pd.Series(values), n_bootstrap=500)
+
+
+@st.cache_data(show_spinner="Training and evaluating the long-wait model…")
+def cached_prediction_summary(frame: pd.DataFrame) -> dict[str, object]:
+    result = train_long_wait_model(frame)
+    return {
+        "metrics": result["metrics"],
+        "feature_effects": result["feature_effects"],
+        "roc_curve": result["roc_curve"],
+    }
 
 
 def main() -> None:
@@ -403,6 +414,92 @@ def main() -> None:
             },
         )
         st.plotly_chart(chart, use_container_width=True)
+
+    st.divider()
+    st.subheader("Long-wait classification model")
+    st.caption(
+        "An interpretable logistic-regression baseline estimates whether an encounter will exceed "
+        "the project's 60-minute long-wait threshold. Only department, recorded priority, visit type, "
+        "and arrival-time features are eligible predictors; wait components, length of stay, and "
+        "disposition are excluded to reduce target leakage."
+    )
+    if st.toggle("Train and evaluate the long-wait model", value=False):
+        try:
+            prediction = cached_prediction_summary(cohort)
+            model_metrics = prediction["metrics"]
+            model_cols = st.columns(5)
+            model_cols[0].metric("ROC AUC", f"{model_metrics['roc_auc']:.3f}")
+            model_cols[1].metric("Average precision", f"{model_metrics['average_precision']:.3f}")
+            model_cols[2].metric("Recall", f"{model_metrics['recall']:.3f}")
+            model_cols[3].metric("Precision", f"{model_metrics['precision']:.3f}")
+            model_cols[4].metric("F1 score", f"{model_metrics['f1']:.3f}")
+            st.caption(
+                f"Stratified random hold-out: {model_metrics['train_observations']:,} training and "
+                f"{model_metrics['test_observations']:,} test encounters. Long-wait prevalence: "
+                f"{model_metrics['long_wait_prevalence_pct']:.1f}%. Classification threshold: "
+                f"{model_metrics['threshold']:.2f}."
+            )
+            roc_left, roc_right = st.columns(2)
+            with roc_left:
+                roc = prediction["roc_curve"]
+                chart = px.line(
+                    roc,
+                    x="false_positive_rate",
+                    y="true_positive_rate",
+                    title="Receiver operating characteristic",
+                    template=CHART_TEMPLATE,
+                    labels={
+                        "false_positive_rate": "False-positive rate",
+                        "true_positive_rate": "True-positive rate",
+                    },
+                )
+                chart.add_shape(
+                    type="line",
+                    x0=0,
+                    y0=0,
+                    x1=1,
+                    y1=1,
+                    line=dict(dash="dash"),
+                )
+                st.plotly_chart(chart, use_container_width=True)
+            with roc_right:
+                confusion = pd.DataFrame(
+                    [
+                        [model_metrics["true_negatives"], model_metrics["false_positives"]],
+                        [model_metrics["false_negatives"], model_metrics["true_positives"]],
+                    ],
+                    index=["Actual ≤60 min", "Actual >60 min"],
+                    columns=["Predicted ≤60 min", "Predicted >60 min"],
+                )
+                chart = px.imshow(
+                    confusion,
+                    text_auto=True,
+                    title="Held-out confusion matrix",
+                    color_continuous_scale="Blues",
+                    labels={"x": "Prediction", "y": "Observed class", "color": "Encounters"},
+                )
+                st.plotly_chart(chart, use_container_width=True)
+            effects = prediction["feature_effects"].head(12).sort_values("coefficient")
+            chart = px.bar(
+                effects,
+                x="coefficient",
+                y="feature",
+                orientation="h",
+                title="Largest logistic-regression coefficients",
+                template=CHART_TEMPLATE,
+                labels={
+                    "coefficient": "Coefficient (log-odds scale)",
+                    "feature": "Encoded feature",
+                },
+            )
+            st.plotly_chart(chart, use_container_width=True)
+            st.caption(
+                "Coefficients describe model associations on the log-odds scale, not causal effects. "
+                "This is a single stratified hold-out evaluation on synthetic data; performance "
+                "does not establish readiness for clinical or operational deployment."
+            )
+        except ValueError as exc:
+            st.info(f"Model evaluation is unavailable for this filtered cohort: {exc}")
 
     st.divider()
     st.subheader("Staffing budget planner — Malawi Kwacha (MWK)")
