@@ -1,6 +1,3 @@
-# Reference configuration only: the notebook currently generates the committed raw CSV
-# independently, and the CLI does not load this file. Keep these values aligned with
-# the notebook until raw-data generation is moved into a configuration-driven module.
 project:
   name: "Chilungamo District Hospital"
   synthetic: true
@@ -11,61 +8,109 @@ paths:
   processed: "data/processed/hospital_patient_flow_clean.csv"
 
 simulation:
+  start_date: "2025-01-01"
+  n_days: 365
+  weekend_multiplier: 1.0
   departments:
     Outpatient Department:
       daily_mean: 45
       open: [7, 16]
       peak: [8, 9]
       night: false
+      registration_staff: 2
+      triage_staff: 2
+      doctors: 2
+      registration_duration: [2, 4, 12]
+      triage_duration: [3, 5, 12]
+      consultation_duration: [6, 12, 35]
+      laboratory_probability: 0.30
+      pharmacy_probability: 0.65
+      priority_distribution: {Routine: 0.80, Urgent: 0.18, Emergency: 0.02}
+      admission_probability: {Routine: 0.01, Urgent: 0.04, Emergency: 0.15}
     Emergency:
       daily_mean: 16
       open: [0, 24]
       peak: [18, 21]
       night: true
+      registration_staff: 1
+      triage_staff: 1
+      doctors: 2
+      registration_duration: [2, 3, 8]
+      triage_duration: [2, 4, 8]
+      consultation_duration: [10, 20, 60]
+      laboratory_probability: 0.55
+      pharmacy_probability: 0.50
+      priority_distribution: {Routine: 0.10, Urgent: 0.40, Emergency: 0.50}
+      admission_probability: {Routine: 0.05, Urgent: 0.20, Emergency: 0.45}
     Maternal Health:
       daily_mean: 11
       open: [7, 16]
       peak: [8, 9]
       night: false
+      registration_staff: 1
+      triage_staff: 1
+      doctors: 1
+      registration_duration: [3, 5, 10]
+      triage_duration: [4, 7, 14]
+      consultation_duration: [10, 18, 40]
+      laboratory_probability: 0.40
+      pharmacy_probability: 0.55
+      priority_distribution: {Routine: 0.70, Urgent: 0.25, Emergency: 0.05}
+      admission_probability: {Routine: 0.03, Urgent: 0.10, Emergency: 0.35}
     Paediatrics:
       daily_mean: 22
       open: [7, 16]
       peak: [8, 9]
       night: false
+      registration_staff: 1
+      triage_staff: 1
+      doctors: 2
+      registration_duration: [3, 5, 10]
+      triage_duration: [3, 6, 12]
+      consultation_duration: [6, 10, 25]
+      laboratory_probability: 0.35
+      pharmacy_probability: 0.75
+      priority_distribution: {Routine: 0.75, Urgent: 0.20, Emergency: 0.05}
+      admission_probability: {Routine: 0.02, Urgent: 0.08, Emergency: 0.25}
     Chronic Care:
       daily_mean: 9
       open: [7, 15]
       peak: [8, 9]
       night: false
+      registration_staff: 1
+      triage_staff: 1
+      doctors: 1
+      registration_duration: [3, 5, 10]
+      triage_duration: [4, 6, 12]
+      consultation_duration: [10, 18, 35]
+      laboratory_probability: 0.50
+      pharmacy_probability: 0.85
+      priority_distribution: {Routine: 0.85, Urgent: 0.13, Emergency: 0.02}
+      admission_probability: {Routine: 0.02, Urgent: 0.06, Emergency: 0.20}
     TB/HIV Clinic:
       daily_mean: 8
       open: [7, 15]
       peak: [8, 9]
       night: false
+      registration_staff: 1
+      triage_staff: 1
+      doctors: 1
+      registration_duration: [3, 5, 10]
+      triage_duration: [4, 6, 12]
+      consultation_duration: [8, 15, 30]
+      laboratory_probability: 0.60
+      pharmacy_probability: 0.90
+      priority_distribution: {Routine: 0.90, Urgent: 0.09, Emergency: 0.01}
+      admission_probability: {Routine: 0.01, Urgent: 0.05, Emergency: 0.15}
 
-  staffing:
-    registration_clerks: 2
-    triage_nurses: 2
-    doctors:
-      Outpatient Department: 2
-      Emergency: 2
-      Maternal Health: 2
-      Paediatrics: 2
-      Chronic Care: 1
-      TB/HIV Clinic: 1
-    lab_techs: 3
-    pharmacists: 4
+  shared_services:
+    laboratory:
+      servers: 3
+      duration: [15, 30, 90]
+    pharmacy:
+      servers: 4
+      duration: [3, 8, 20]
 
-  lab:
-    request_share: 0.42
-    service_mean: 45
-    service_mode: "triangular"
-
-  pharmacy:
-    request_share: 0.66
-    service_mean: 20
-
-  weekend_multiplier: 0.8
   issue_injection:
     missing_satisfaction_rate: 0.025
     missing_referral_rate: 0.025
