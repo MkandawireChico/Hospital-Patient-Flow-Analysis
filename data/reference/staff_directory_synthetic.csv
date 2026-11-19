@@ -1,0 +1,41 @@
+Staff_ID,Staff_Name,Job_Title,Department,Staff_Category,Qualification,Employment_Type,Employment_Status,Start_Date
+STF-0001,Thoko Banda,Medical Officer,Outpatient Department,Clinical,MBBS,Full-time,Active,2021-03-15
+STF-0002,Chisomo Phiri,Medical Officer,Outpatient Department,Clinical,MBBS,Full-time,Active,2020-08-03
+STF-0003,Limbani Chirwa,Medical Officer,Emergency,Clinical,MBBS,Full-time,Active,2019-11-18
+STF-0004,Tadala Mbewe,Medical Officer,Emergency,Clinical,MBBS,Full-time,Active,2022-02-07
+STF-0005,Mphatso Zulu,Medical Officer,Maternal Health,Clinical,MBBS,Full-time,Active,2021-06-21
+STF-0006,Yamikani Nkhoma,Medical Officer,Maternal Health,Clinical,MBBS,Full-time,Active,2023-01-09
+STF-0007,Pempho Gondwe,Medical Officer,Paediatrics,Clinical,MBBS,Full-time,Active,2020-04-13
+STF-0008,Dalitso Kayira,Medical Officer,Paediatrics,Clinical,MBBS,Full-time,Active,2022-09-05
+STF-0009,Chikondi Kachale,Medical Officer,Chronic Care,Clinical,MBBS,Full-time,Active,2018-07-02
+STF-0010,Aubrey Moyo,Medical Officer,TB/HIV Clinic,Clinical,MBBS,Full-time,Active,2021-10-11
+STF-0011,Ethel Kamanga,Registered Nurse,Emergency,Nursing,BSc Nursing,Full-time,Active,2017-05-08
+STF-0012,Memory Chisale,Registered Nurse,Maternal Health,Nursing,BSc Nursing,Full-time,Active,2019-02-04
+STF-0013,Grace Jere,Registered Nurse,Paediatrics,Nursing,Diploma Nursing,Full-time,Active,2020-12-14
+STF-0014,Tionge Nyirenda,Registered Nurse,Outpatient Department,Nursing,Diploma Nursing,Full-time,Active,2022-03-28
+STF-0015,Fatsani Chitsonga,Registered Nurse,Emergency,Nursing,Diploma Nursing,Full-time,Active,2018-10-01
+STF-0016,Ruth Chiumia,Registered Nurse,Maternal Health,Nursing,BSc Nursing,Full-time,Active,2021-01-18
+STF-0017,Brighton Chisomo,Registered Nurse,Outpatient Department,Nursing,Diploma Nursing,Full-time,Active,2023-04-03
+STF-0018,Annie Mvula,Registered Nurse,Chronic Care,Nursing,Diploma Nursing,Full-time,Active,2019-08-19
+STF-0019,Jameson Msiska,Registered Nurse,TB/HIV Clinic,Nursing,Diploma Nursing,Full-time,Active,2020-06-15
+STF-0020,Madalitso Chikondi,Registered Nurse,Paediatrics,Nursing,BSc Nursing,Full-time,Active,2022-11-07
+STF-0021,Peter Chawinga,Laboratory Technologist,Laboratory,Diagnostics,BSc Medical Laboratory Science,Full-time,Active,2018-01-22
+STF-0022,Rachael Mhone,Laboratory Technologist,Laboratory,Diagnostics,Diploma Medical Laboratory,Full-time,Active,2020-09-14
+STF-0023,Kelvin Lungu,Laboratory Assistant,Laboratory,Diagnostics,Diploma Laboratory Technology,Full-time,Active,2023-02-06
+STF-0024,Agnes Chirwa,Pharmacist,Pharmacy,Pharmacy,BPharm,Full-time,Active,2017-09-11
+STF-0025,William Nthara,Pharmacy Technician,Pharmacy,Pharmacy,Diploma Pharmacy,Full-time,Active,2019-04-29
+STF-0026,Martha Chikuni,Pharmacy Technician,Pharmacy,Pharmacy,Diploma Pharmacy,Full-time,Active,2021-07-12
+STF-0027,Charles Kaluwa,Pharmacy Assistant,Pharmacy,Pharmacy,Certificate Pharmacy,Full-time,Active,2022-05-16
+STF-0028,Faith Manda,Registration Clerk,Administration,Administration,Diploma Business Administration,Full-time,Active,2018-03-05
+STF-0029,Daniel Chirwa,Registration Clerk,Administration,Administration,MSCE,Full-time,Active,2020-01-20
+STF-0030,Loveness Zgambo,Health Surveillance Assistant,Outpatient Department,Community Health,Certificate HSA,Full-time,Active,2021-11-01
+STF-0031,Gift Chisanga,Health Surveillance Assistant,Maternal Health,Community Health,Certificate HSA,Full-time,Active,2022-06-06
+STF-0032,Mwayi Chitsonga,Records Officer,Administration,Administration,Diploma Health Records,Full-time,Active,2019-12-02
+STF-0033,Austin Mponda,Cleaner,Facilities,Support,MSCE,Full-time,Active,2017-02-13
+STF-0034,Bertha Nkhata,Cleaner,Facilities,Support,MSCE,Full-time,Active,2018-08-27
+STF-0035,Yusuf Ali,Security Officer,Facilities,Support,MSCE,Full-time,Active,2020-10-05
+STF-0036,Esnart Chikopa,Maintenance Officer,Facilities,Support,Trade Certificate,Full-time,Active,2021-04-19
+STF-0037,Chifundo Mvula,Nursing Officer,Outpatient Department,Nursing,BSc Nursing,Full-time,Active,2016-06-20
+STF-0038,Nellie Banda,Nursing Officer,Emergency,Nursing,BSc Nursing,Full-time,Active,2015-03-09
+STF-0039,Rodrick Mbewe,Data Clerk,Administration,Administration,Diploma ICT,Full-time,Active,2023-07-03
+STF-0040,Tiwonge Juma,Medical Records Assistant,Administration,Administration,Certificate Health Records,Full-time,Active,2022-01-10

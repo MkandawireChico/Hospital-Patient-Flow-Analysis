@@ -5,6 +5,8 @@ from typing import Any
 
 import pandas as pd
 
+from patient_flow.flags import boolean_flag_column
+
 LONG_WAIT_THRESHOLD_MINUTES = 60.0
 STAGE_WAIT_COLUMNS = {
     "Registration": "Wait_For_Registration_Min",
@@ -22,9 +24,8 @@ def load_processed_data(path: str) -> pd.DataFrame:
 
 
 def _boolean_column(df: pd.DataFrame, column: str) -> pd.Series:
-    if column not in df.columns:
-        return pd.Series(False, index=df.index)
-    return df[column].fillna(False).astype(bool)
+    """Compatibility wrapper for the shared CSV-safe boolean parser."""
+    return boolean_flag_column(df, column)
 
 
 def _wait_column(df: pd.DataFrame) -> str:

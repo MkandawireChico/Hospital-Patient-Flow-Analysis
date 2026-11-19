@@ -13,3 +13,6 @@ run:
 
 analyse:
 	PYTHONPATH=src python -m patient_flow.cli analyse
+
+dashboard:
+	PYTHONPATH=src streamlit run dashboard/app.py
