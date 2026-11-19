@@ -128,6 +128,10 @@ Additional technical documentation:
 - [MWK costing guide](docs/MWK_COSTING_GUIDE.md)
 - [Portfolio case study](docs/PORTFOLIO_CASE_STUDY.md)
 - [Portfolio presentation and interview walkthrough](docs/PORTFOLIO_PRESENTATION.md)
+- [Workforce and roster analytics](docs/WORKFORCE_ANALYTICS.md)
+- [Workforce data dictionary](docs/WORKFORCE_DATA_DICTIONARY.md)
+- [Deployment guide](docs/DEPLOYMENT.md)
+- [SQL analysis guide](sql/README.md)
 
 ## Project workflow
 
@@ -141,18 +145,22 @@ Additional technical documentation:
 ## Repository structure
 
 ```text
-config/                 Simulation configuration
-dashboard/              Power BI dashboard guide
-data/raw/               Encounter source data
+.github/workflows/      Automated test and lint checks
+config/                 Reference simulation settings and MWK cost template
+dashboard/              Streamlit patient-flow app, workforce page and Power BI guide
+data/raw/               Committed generated encounter source
 data/processed/         Cleaned and feature-engineered encounters
-notebooks/              Exploratory analysis notebook
+data/reference/         Staff directory; roster generated on demand
+docs/                   Methods, architecture, deployment, workforce and portfolio guides
+docs/images/            Application screenshots used in the README gallery
+notebooks/              Exploratory patient-flow simulation and analysis
 reports/                Generated decision summary
 results/                Generated baseline and scenario CSV tables
-sql/                    SQLite schema, builder, queries, and notes
-src/patient_flow/       Cleaning, features, analysis, scenarios, and CLI
-tests/                  Pytest coverage
+sql/                    SQLite schema, builder, database and analytical queries
+src/patient_flow/       Cleaning, analysis, prediction, workforce, capacity and costing modules
+tests/                  Pytest regression coverage
 visuals/charts/         Analysis chart exports
-Makefile                Common setup, test, lint, and run commands
+Makefile                Common setup, test, lint and run commands
 pyproject.toml          Package and tool configuration
 requirements.txt        Runtime and development dependencies
 ```
@@ -260,7 +268,7 @@ python -m pytest -q
 python -m ruff check .
 ```
 
-The simulation seed and generation parameters are maintained in `config/default.yaml`. The CLI is implemented in `src/patient_flow/cli.py`; `make run`, `make analyse`, `make test`, and `make lint` provide the corresponding Make targets where Make is available.
+The exploratory notebook currently generates the committed raw encounter CSV. `config/default.yaml` is a reference settings file and is not yet consumed by that generator or the CLI; consolidating these into one configuration-driven generator is a documented next step. The CLI is implemented in `src/patient_flow/cli.py`; `make run`, `make analyse`, `make test`, and `make lint` provide the corresponding Make targets where Make is available.
 
 ## Author
 
