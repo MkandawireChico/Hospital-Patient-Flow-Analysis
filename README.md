@@ -1,6 +1,40 @@
 # Hospital Operations Analytics & Workforce Planning
 
-*Patient flow • Workforce coverage • Bottleneck analysis • MWK resource planning*
+<p align="center">
+  <strong>Patient flow • Workforce coverage • Bottleneck analysis • MWK resource planning</strong>
+</p>
+
+<p align="center">
+  <a href="https://hospital-operations-command-centre.streamlit.app/"><strong>▶ Open the live Hospital Operations Command Centre</strong></a>
+  &nbsp;•&nbsp;
+  <a href="docs/PORTFOLIO_CASE_STUDY.md">Read the portfolio case study</a>
+  &nbsp;•&nbsp;
+  <a href="docs/DASHBOARD_USER_GUIDE.md">Dashboard user guide</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/MkandawireChico/Hospital-Patient-Flow-Analysis/actions/workflows/quality.yml"><img src="https://github.com/MkandawireChico/Hospital-Patient-Flow-Analysis/actions/workflows/quality.yml/badge.svg" alt="Quality checks"></a>
+  <a href="https://hospital-operations-command-centre.streamlit.app/"><img src="https://img.shields.io/badge/Live%20demo-Streamlit-FF4B4B?logo=streamlit&logoColor=white" alt="Live Streamlit demo"></a>
+  <img src="https://img.shields.io/badge/Currency-MWK-2D6A4F" alt="Malawi Kwacha">
+  <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white" alt="Python 3.11 or newer">
+</p>
+
+> **Explore the deployed application:** [hospital-operations-command-centre.streamlit.app](https://hospital-operations-command-centre.streamlit.app/). The dashboard brings patient-flow analytics, workforce coverage, role-based establishment and MWK budget planning into one interactive command centre.
+
+## At a glance
+
+| Area | What the project delivers |
+|---|---|
+| Patient-flow analytics | Waiting-time KPIs, department and service-stage bottlenecks, arrival patterns and long-wait analysis |
+| Workforce analytics | Staff establishment, role mix, date-aligned shift rosters and demand-to-workforce views |
+| Decision support | Transparent what-if scenarios, capacity sensitivity and role-based staffing budgets in MWK |
+| Predictive analytics | Leakage-conscious logistic-regression baseline for long-wait classification |
+| Data quality | Auditable timestamp checks, wait validation, exclusions and downloadable filtered data |
+| Engineering | Reproducible Python workflow, modular source code, automated tests and lint checks |
+
+**Technology:** Python, pandas, NumPy, Streamlit, Plotly, scikit-learn, pytest and Ruff.
+
+---
 This project examines patient flow and workforce operations in a Malawi-inspired district-hospital case study. It asks: **Where do patients lose time in the hospital pathway, how does demand align with staffing, and which operational changes merit further investigation?** The repository provides a reproducible Python workflow for data quality, operational analysis, scenario comparison, workforce planning, predictive modelling and decision-ready visualisation.
 
 ## Why this project exists
@@ -88,7 +122,11 @@ Thresholds and flags are operational heuristics. Scenario reductions are assumed
 
 ## Live deployment
 
-The Streamlit command centre can be deployed publicly with Streamlit Community Cloud. See the [deployment guide](docs/DEPLOYMENT.md) for the repository, branch, app entrypoint, Python version, first-time setup and post-deployment checks. The public app URL is assigned by Streamlit after deployment.
+The application is live on Streamlit Community Cloud:
+
+**[Launch the Hospital Operations Command Centre](https://hospital-operations-command-centre.streamlit.app/)**
+
+The deployed app uses this repository's `main` branch and `dashboard/app.py` entrypoint. See the [deployment guide](docs/DEPLOYMENT.md) for setup details and post-deployment checks.
 
 ## Interactive dashboard
 
