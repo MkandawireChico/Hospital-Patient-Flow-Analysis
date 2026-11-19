@@ -12,10 +12,17 @@ from . import config as config_module
 
 
 def _daytime_hour_probs(
-    open_hour: int, close_hour: int, peak_start: int, peak_end: int
+    open_hour: int,
+    close_hour: int,
+    peak_start: int,
+    peak_end: int,
+    weights_config: dict[str, Any],
 ) -> np.ndarray:
     hours = range(open_hour, close_hour)
-    weights = np.array([4.0 if peak_start <= hour < peak_end else 1.0 for hour in hours])
+    weights = np.array([
+        float(weights_config["peak"] if peak_start <= hour < peak_end else weights_config["default"])
+        for hour in hours
+    ])
     return weights / weights.sum()
 
 
@@ -27,7 +34,11 @@ def _emergency_hour_probs(pattern: dict[str, Any]) -> np.ndarray:
 
 
 def _sample_arrival(
-    department: dict[str, Any], day_start: pd.Timestamp, emergency_pattern: dict[str, Any]
+    department: dict[str, Any],
+    day_start: pd.Timestamp,
+    emergency_pattern: dict[str, Any],
+    daytime_pattern: dict[str, Any],
+    minute_bounds: list[int],
 ) -> pd.Timestamp:
     open_hour, close_hour = department["open"]
     peak_start, peak_end = department["peak"]
@@ -36,9 +47,12 @@ def _sample_arrival(
     else:
         hour = int(np.random.choice(
             range(open_hour, close_hour),
-            p=_daytime_hour_probs(open_hour, close_hour, peak_start, peak_end),
+            p=_daytime_hour_probs(
+                open_hour, close_hour, peak_start, peak_end, daytime_pattern
+            ),
         ))
-    return day_start + pd.Timedelta(hours=hour, minutes=int(np.random.randint(0, 60)))
+    minute = int(np.random.randint(int(minute_bounds[0]), int(minute_bounds[1]) + 1))
+    return day_start + pd.Timedelta(hours=hour, minutes=minute)
 
 
 def _process_queue(
@@ -108,6 +122,8 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
 
     department_codes = settings["department_codes"]
     emergency_pattern = settings["arrival_patterns"]["emergency_hour_weights"]
+    daytime_pattern = settings["arrival_patterns"]["daytime_hour_weights"]
+    minute_bounds = settings["arrival_patterns"]["arrival_minute_bounds"]
     records: list[dict[str, Any]] = []
     patient_counter = 0
 
@@ -127,7 +143,10 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
                 continue
 
             arrivals = sorted(
-                _sample_arrival(dept, day_start, emergency_pattern) for _ in range(n_patients)
+                _sample_arrival(
+                    dept, day_start, emergency_pattern, daytime_pattern, minute_bounds
+                )
+                for _ in range(n_patients)
             )
             reg_starts, reg_ends = _process_queue(
                 arrivals,
@@ -303,9 +322,10 @@ def _add_derived_fields(df: pd.DataFrame, config: dict[str, Any]) -> pd.DataFram
     ).clip(upper=float(satisfaction["maximum_wait_penalty"]))
     admission_component = np.where(admitted, float(satisfaction["admission_penalty"]), 0.0)
     noise = np.random.normal(0, float(satisfaction["noise_standard_deviation"]), len(output))
+    score_min, score_max = satisfaction["score_bounds"]
     output["Patient_Satisfaction_Score"] = (
         float(satisfaction["baseline_score"]) - wait_component - admission_component + noise
-    ).round().clip(1, 5).astype(int)
+    ).round().clip(int(score_min), int(score_max)).astype(int)
     return output
 
 
@@ -337,15 +357,18 @@ def _inject_quality_issues(df: pd.DataFrame, config: dict[str, Any]) -> pd.DataF
         frac=impossible_rate, random_state=states["impossible_timestamps"]
     ).index
     output.loc[impossible_idx, "Consultation_Start_Time"] = (
-        output.loc[impossible_idx, "Arrival_Time"] - pd.Timedelta(minutes=15)
+        output.loc[impossible_idx, "Arrival_Time"]
+        - pd.Timedelta(minutes=float(issue["impossible_timestamp_offset_minutes"]))
     )
     negative_idx = output.sample(frac=negative_rate, random_state=states["negative_waits"]).index
     output.loc[negative_idx, "Total_Waiting_Time"] = (
         -np.abs(output.loc[negative_idx, "Total_Waiting_Time"])
-        - rng.uniform(1, 20, len(negative_idx))
+        - rng.uniform(*issue["negative_wait_magnitude_minutes"], size=len(negative_idx))
     )
     outlier_idx = output.sample(frac=outlier_rate, random_state=states["los_outliers"]).index
-    output.loc[outlier_idx, "Total_Length_of_Stay"] *= rng.uniform(5, 8, len(outlier_idx))
+    output.loc[outlier_idx, "Total_Length_of_Stay"] *= rng.uniform(
+        *issue["los_outlier_multiplier"], size=len(outlier_idx)
+    )
     bad_department_idx = output.sample(
         frac=department_rate, random_state=states["department_errors"]
     ).index
