@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from patient_flow.analysis import filter_analysis_frame
 from patient_flow.config import PROJECT_ROOT
 
 STAFF_PATH = PROJECT_ROOT / "data" / "reference" / "staff_directory_synthetic.csv"
@@ -175,6 +176,49 @@ def build_demand_coverage(
     return result.sort_values(
         ["Roster_Date", "Department", "Shift"]
     ).reset_index(drop=True)
+
+
+
+def build_service_wait_summary(encounters: pd.DataFrame) -> pd.DataFrame:
+    """Summarise observed stage waits against the workforce unit serving each stage."""
+    analysis = filter_analysis_frame(encounters)
+    stage_specs = [
+        ("Wait_For_Consultation_Min", "Consultation", "Department"),
+        ("Laboratory_Wait_Time", "Laboratory", "Laboratory"),
+        ("Pharmacy_Wait_Time", "Pharmacy", "Pharmacy"),
+        ("Wait_For_Registration_Min", "Registration", "Administration"),
+    ]
+    rows: list[dict[str, object]] = []
+    for column, stage, unit_source in stage_specs:
+        if column not in analysis.columns:
+            continue
+        values = pd.to_numeric(analysis[column], errors="coerce")
+        frame = analysis.assign(_Stage_Wait=values).dropna(subset=["_Stage_Wait"])
+        if unit_source == "Department":
+            frame = frame.dropna(subset=["Department"]).assign(
+                Workforce_Unit=frame["Department"].astype("string")
+            )
+        else:
+            frame = frame.assign(Workforce_Unit=unit_source)
+        for unit, group in frame.groupby("Workforce_Unit", dropna=True, sort=True):
+            waits = group["_Stage_Wait"]
+            rows.append({
+                "Workforce_Unit": str(unit),
+                "Service_Stage": stage,
+                "Service_Events": int(waits.count()),
+                "Median_Wait_Min": float(waits.median()),
+                "P90_Wait_Min": float(waits.quantile(0.9)),
+                "Long_Wait_Over_60_Pct": float(waits.gt(60).mean() * 100),
+            })
+    return pd.DataFrame(rows, columns=[
+        "Workforce_Unit",
+        "Service_Stage",
+        "Service_Events",
+        "Median_Wait_Min",
+        "P90_Wait_Min",
+        "Long_Wait_Over_60_Pct",
+    ]).sort_values(["Workforce_Unit", "Service_Stage"]).reset_index(drop=True)
+
 
 
 def ensure_roster(
