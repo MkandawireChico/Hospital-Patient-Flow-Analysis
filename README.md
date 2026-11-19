@@ -99,6 +99,7 @@ The project includes a Streamlit command centre with interactive Plotly charts. 
 - **Arrival pressure:** hourly encounter volume alongside P90 wait, plus monthly median/P90 trends.
 - **Stage and priority analysis:** stage-specific P90 waits, observed stage-wait contribution, and priority comparisons.
 - **What-if scenarios:** overall P90 and long-wait-share comparisons, plus department-level median changes.
+- **Predictive baseline:** leakage-conscious logistic regression for the 60-minute long-wait target, with hold-out metrics, ROC curve, confusion matrix, and coefficient chart.
 - **Data quality:** timestamp, negative-wait, department-label, and length-of-stay audit counts.
 - **Filtered export:** inspect and download the filtered encounter cohort as CSV.
 
@@ -116,7 +117,7 @@ Alternatively, use `make dashboard` where Make is available. The dashboard reads
 
 For the costing method and input governance, see [the MWK costing guide](docs/MWK_COSTING_GUIDE.md) and [the editable assumptions template](config/mwk_staffing_cost_template.csv).
 
-The dashboard includes a staffing budget planner denominated in **MWK**. Enter locally verified monthly fully loaded staff costs and additional FTE assumptions to calculate monthly and multi-month staffing budgets. No USD conversion or unverified salary estimates are built in. The dashboard also offers optional 95% bootstrap confidence intervals for median wait, P90 wait, and long-wait share.
+The dashboard includes a staffing budget planner denominated in **MWK** and an optional long-wait classification model built with scikit-learn. Enter locally verified monthly fully loaded staff costs and additional FTE assumptions to calculate monthly and multi-month staffing budgets. No USD conversion or unverified salary estimates are built in. The dashboard also offers optional 95% bootstrap confidence intervals for median wait, P90 wait, and long-wait share.
 
 ## Power BI
 
