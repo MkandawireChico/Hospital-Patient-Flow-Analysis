@@ -97,15 +97,40 @@ if not role_establishment_view.empty:
             use_container_width=True,
         )
 if not role_coverage_view.empty:
+    # Aggregate by job title and shift, then use horizontal bars so long
+    # role labels remain readable on narrow mobile screens.
     role_hours = role_coverage_view.groupby(
-        ["Job_Title", "Shift", "Staff_Category"], as_index=False
+        ["Job_Title", "Shift"], as_index=False
     ).agg(Scheduled_Hours=("Scheduled_Hours", "sum"))
-    st.plotly_chart(
-        px.bar(role_hours, x="Job_Title", y="Scheduled_Hours", color="Shift",
-               facet_col="Staff_Category", barmode="group",
-               title="Scheduled hours by job title and shift"),
-        use_container_width=True,
+    role_order = (
+        role_hours.groupby("Job_Title")["Scheduled_Hours"]
+        .sum()
+        .sort_values(ascending=True)
+        .index.tolist()
     )
+    role_chart = px.bar(
+        role_hours,
+        x="Scheduled_Hours",
+        y="Job_Title",
+        color="Shift",
+        barmode="group",
+        orientation="h",
+        category_orders={"Job_Title": role_order, "Shift": ["DAY", "EVENING", "NIGHT"]},
+        labels={
+            "Job_Title": "Job title",
+            "Scheduled_Hours": "Scheduled hours",
+            "Shift": "Shift",
+        },
+        title="Scheduled hours by job title and shift",
+        hover_data={"Scheduled_Hours": ":,.0f"},
+    )
+    role_chart.update_layout(
+        height=max(520, 42 * len(role_order) + 150),
+        legend_title_text="Shift",
+        margin={"l": 20, "r": 20, "t": 75, "b": 35},
+    )
+    role_chart.update_yaxes(automargin=True, title_standoff=12)
+    st.plotly_chart(role_chart, use_container_width=True)
     role_shift = role_coverage_view.groupby(
         ["Department", "Job_Title", "Shift"], as_index=False
     )["Staff_On_Duty"].mean()
