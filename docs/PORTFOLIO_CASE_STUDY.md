@@ -88,7 +88,7 @@ streamlit run dashboard/app.py
 
 The dashboard includes an optional logistic-regression baseline for classifying encounters that exceed the 60-minute long-wait threshold. It uses a stratified train/test split and reports ROC AUC, average precision, precision, recall, F1, a confusion matrix, an ROC curve, and encoded feature coefficients.
 
-Predictors are limited to pre-outcome encounter descriptors and arrival-time features (department, recorded priority, visit type, arrival hour, day of week, and month where available). Wait components, total waiting time, length of stay, and disposition are deliberately excluded from the feature matrix to reduce target leakage. Coefficients are associations in the fitted model, not causal effects.
+Predictors are limited to encounter descriptors available at or near registration and arrival-time features (department, visit type, arrival hour, day of week, and month where available). Triage priority is excluded because it may be assigned after the waiting-time clock has started. Wait components, total waiting time, length of stay, and disposition are deliberately excluded from the feature matrix to reduce target leakage. Coefficients are associations in the fitted model, not causal effects.
 
 This is an exploratory baseline on synthetic data. It has not been externally validated, calibrated for a real facility, or assessed for fairness or clinical utility. It must not be used to prioritise real patients or make clinical decisions.
 
