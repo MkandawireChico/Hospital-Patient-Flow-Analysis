@@ -62,8 +62,9 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"Shared service {name}: duration must be three positive, ordered triangular values.")
 
     _validate_probability_map(demographics["default_sex_distribution"], "demographics.default_sex_distribution")
-    _validate_probability_map(patterns["nonexistent"] if "nonexistent" in patterns else {"valid": 1.0}, "encounter_patterns")
     _validate_probability_map(behaviour["non_admitted_disposition_probabilities"], "behaviour.non_admitted_disposition_probabilities")
+    if len(demographics["age_groups"]) != len(demographics["default_age_distribution"]):
+        raise ValueError("Default age groups and probabilities must have matching lengths.")
     _validate_probability_map({
         str(index): value for index, value in enumerate(demographics["default_age_distribution"])
     }, "demographics.default_age_distribution")
@@ -76,18 +77,39 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"Age groups and probabilities do not align for {name}.")
     for name, distribution in demographics["department_sex_distributions"].items():
         _validate_probability_map(distribution, f"demographics.department_sex_distributions.{name}")
+    for name, probability in patterns["department_referral_probabilities"].items():
+        if not 0 <= float(probability) <= 1:
+            raise ValueError(f"Referral probability for {name} must be between 0 and 1.")
+    for name, distribution in patterns["visit_type_probabilities"].items():
+        _validate_probability_map(distribution, f"encounter_patterns.visit_type_probabilities.{name}")
+    if set(simulation["department_codes"]) != set(departments):
+        raise ValueError("department_codes must contain exactly the configured department names.")
+    arrival = simulation["arrival_patterns"]["emergency_hour_weights"]
+    for key in ("default", "evening_peak", "early_morning"):
+        if float(arrival[key]) <= 0:
+            raise ValueError(f"Emergency arrival weight {key} must be positive.")
+    if any(not 0 <= int(hour) <= 23 for key in ("evening_hours", "early_morning_hours") for hour in arrival[key]):
+        raise ValueError("Emergency arrival hour lists must contain hours from 0 to 23.")
+    if int(issue["random_seed"]) < 0:
+        raise ValueError("simulation.issue_injection.random_seed must be non-negative.")
     for key, value in issue.items():
         if key.endswith("_rate") and not 0 <= float(value) <= 1:
             raise ValueError(f"simulation.issue_injection.{key} must be between 0 and 1.")
+    satisfaction = behaviour["satisfaction"]
     for name, value in (
         ("referral_probability", patterns["referral_probability"]),
         ("non_routine_laboratory_probability_multiplier", behaviour["non_routine_laboratory_probability_multiplier"]),
-        ("satisfaction.noise_standard_deviation", behaviour["satisfaction"]["noise_standard_deviation"]),
+        ("satisfaction.noise_standard_deviation", satisfaction["noise_standard_deviation"]),
+        ("satisfaction.wait_penalty_divisor_minutes", satisfaction["wait_penalty_divisor_minutes"]),
+        ("satisfaction.maximum_wait_penalty", satisfaction["maximum_wait_penalty"]),
+        ("satisfaction.baseline_score", satisfaction["baseline_score"]),
     ):
         if float(value) < 0:
             raise ValueError(f"{name} must be non-negative.")
-    if float(behaviour["non_routine_laboratory_probability_multiplier"]) < 0:
-        raise ValueError("Non-routine laboratory multiplier must be non-negative.")
+    if float(satisfaction["wait_penalty_divisor_minutes"]) == 0:
+        raise ValueError("Satisfaction wait penalty divisor must be greater than zero.")
+    if float(satisfaction["admission_penalty"]) < 0:
+        raise ValueError("Satisfaction admission penalty must be non-negative.")
     for key in ("admission_extra_stay_minutes",):
         values = [float(value) for value in behaviour[key]]
         if len(values) != 2 or values[0] < 0 or values[1] < values[0]:
