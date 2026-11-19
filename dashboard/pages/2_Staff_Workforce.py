@@ -146,6 +146,11 @@ st.caption(
 if not coverage_view.empty:
     unit_options = sorted(coverage_view["Department"].dropna().unique().tolist())
     selected_unit = st.selectbox("Workforce unit for sensitivity", unit_options)
+    shift_options = sorted(
+        coverage_view.loc[coverage_view["Department"].eq(selected_unit), "Shift"]
+        .dropna().unique().tolist()
+    )
+    selected_shift = st.selectbox("Shift to receive additional hours", shift_options)
     scenario_left, scenario_right = st.columns(2)
     with scenario_left:
         additional_fte = st.number_input(
@@ -189,6 +194,7 @@ if not coverage_view.empty:
     sensitivity = build_capacity_sensitivity(
         coverage_view,
         workforce_unit=selected_unit,
+        shift=selected_shift,
         additional_fte=additional_fte,
         monthly_cost_per_fte_mwk=monthly_cost,
         period_months=period_months,
@@ -229,7 +235,7 @@ if not coverage_view.empty:
             comparison,
             x="Scenario",
             y="Demand events per scheduled hour",
-            title=f"{selected_unit}: workload intensity sensitivity",
+            title=f"{selected_unit} · {selected_shift}: workload intensity sensitivity",
         ),
         use_container_width=True,
     )
@@ -239,7 +245,7 @@ if not coverage_view.empty:
             st.warning("The non-zero MWK cost is provisional until a source reference and valid effective date are recorded.")
     st.caption(
         f"Analysis window: {period_days} roster days, cost and added hours prorated over {period_months:.2f} 30-day months. "
-        f"Added hours assume {monthly_hours:.0f} hours per FTE-month. This is an explicit sensitivity assumption, "
+        f"Added hours are allocated only to the selected {selected_shift} shift and assume {monthly_hours:.0f} hours per FTE-month. This is an explicit sensitivity assumption, "
         "not a prediction that the same hours can be safely scheduled in every shift."
     )
     st.download_button(
