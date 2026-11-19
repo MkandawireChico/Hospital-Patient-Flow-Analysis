@@ -22,5 +22,5 @@ Do not add real names, phone numbers, addresses, payroll identifiers, or other p
 | `Demand_Shift_Basis` | Documents that service-stage demand is grouped by patient arrival shift as a proxy |
 | `Staff_On_Duty` | Unique staff scheduled in the roster for the date, workforce unit and shift |
 | `Scheduled_Hours` | Sum of rostered hours for the matched group |
-| `Encounters_Per_Staff` | Demand events divided by rostered staff; descriptive workload indicator |
-| `Encounters_Per_Scheduled_Hour` | Demand events divided by scheduled staff-hours; descriptive workload indicator |
+| `Demand_Events_Per_Staff` | Demand events divided by rostered staff; descriptive workload indicator |
+| `Demand_Events_Per_Scheduled_Hour` | Demand events divided by scheduled staff-hours; descriptive workload indicator |
