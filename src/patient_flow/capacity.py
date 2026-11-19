@@ -8,6 +8,7 @@ import pandas as pd
 def build_capacity_sensitivity(
     coverage: pd.DataFrame,
     workforce_unit: str,
+    shift: str,
     additional_fte: float,
     monthly_cost_per_fte_mwk: float,
     period_months: float,
@@ -32,13 +33,17 @@ def build_capacity_sensitivity(
     if period_months <= 0 or monthly_hours_per_fte <= 0:
         raise ValueError("Period months and monthly hours per FTE must be positive")
 
-    required = {"Department", "Demand_Events", "Scheduled_Hours"}
+    required = {"Department", "Shift", "Demand_Events", "Scheduled_Hours"}
     missing = required.difference(coverage.columns)
     if missing:
         raise ValueError(f"Coverage data is missing columns: {sorted(missing)}")
-    selected = coverage.loc[coverage["Department"].eq(workforce_unit)]
+    selected = coverage.loc[
+        coverage["Department"].eq(workforce_unit) & coverage["Shift"].eq(shift)
+    ]
     if selected.empty:
-        raise ValueError(f"No demand-coverage records found for {workforce_unit!r}")
+        raise ValueError(
+            f"No demand-coverage records found for {workforce_unit!r} on {shift!r}"
+        )
 
     demand_events = float(pd.to_numeric(selected["Demand_Events"], errors="coerce").fillna(0).sum())
     scheduled_hours = float(
@@ -53,6 +58,7 @@ def build_capacity_sensitivity(
 
     return {
         "workforce_unit": workforce_unit,
+        "shift": shift,
         "demand_events": demand_events,
         "current_scheduled_hours": scheduled_hours,
         "additional_fte": float(additional_fte),
