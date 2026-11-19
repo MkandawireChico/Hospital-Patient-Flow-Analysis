@@ -29,18 +29,20 @@ All charts and KPI cards update for the filtered cohort. If a filter selection r
 2. **Waiting-time distribution:** histogram and box plot with the 60-minute threshold.
 3. **Department bottlenecks:** department-level P90 waits with encounter volume context.
 4. **Arrival pressure:** encounter count and P90 wait by arrival hour.
-5. **Monthly trend:** median and P90 waiting-time trends by month.
-6. **Stage delays:** P90 wait by recorded stage and each stage's share of summed observed stage-wait minutes.
-7. **Priority comparison:** median and P90 by recorded priority.
-8. **What-if scenarios:** baseline versus consultation wait-reduction scenarios.
-9. **Bootstrap intervals:** optional 95% confidence intervals for median, P90, and long-wait share.
-11. **MWK staffing budget planner:** enter additional FTE and verified monthly fully loaded staff cost per person. Results show monthly and selected-period budgets in MWK.
-12. **Data-quality audit:** flagged quality issues, exclusions, and missing wait values.
-13. **Filtered data export:** download the filtered valid cohort as CSV.
+5. **Department/hour heatmap:** median valid wait by department and arrival hour, with encounter counts on hover.
+6. **Monthly trend:** median and P90 waiting-time trends by month.
+7. **Stage delays:** P90 wait by recorded stage and each stage's share of summed observed stage-wait minutes.
+8. **Priority comparison:** median and P90 by recorded priority.
+9. **What-if scenarios:** baseline versus consultation wait-reduction scenarios.
+10. **Bootstrap intervals:** optional 95% confidence intervals for median, P90, and long-wait share.
+11. **Long-wait classification:** exploratory logistic-regression model with hold-out metrics and diagnostic charts.
+12. **MWK staffing budget planner:** additional FTE, verified monthly staff costs, source and effective date, and monthly/period totals in MWK.
+13. **Data-quality audit:** flagged quality issues, exclusions, and missing wait values.
+14. **Filtered data export:** download the filtered valid cohort as CSV.
 
 ### Long-wait classification
 
-Toggle **Train and evaluate the long-wait model** to fit an exploratory logistic-regression classifier on the current filtered cohort. It shows hold-out ROC AUC, average precision, recall, precision, F1, the ROC curve, confusion matrix, and the largest encoded coefficients. The model uses only encounter descriptors and arrival-time features. If the filtered cohort is too small or contains only one target class, the dashboard explains why evaluation is unavailable.
+Toggle **Train and evaluate the long-wait model** to fit an exploratory logistic-regression classifier on the current filtered cohort. It shows hold-out ROC AUC, average precision, recall, precision, F1, the ROC curve, confusion matrix, and the largest encoded coefficients. The model uses only department, visit type, and arrival-time features. Triage priority is excluded because it may be assigned after the waiting-time clock has started. If the filtered cohort is too small or contains only one target class, the dashboard explains why evaluation is unavailable.
 
 The classifier is an exploratory synthetic-data demonstration, not a clinical decision tool. See [Analytical Methods](ANALYTICAL_METHODS.md) for feature exclusions, leakage safeguards, and validation requirements.
 
