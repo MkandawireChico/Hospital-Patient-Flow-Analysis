@@ -52,10 +52,15 @@ def main() -> None:
         action="store_true",
         help="Skip simulation and rebuild outputs from the committed raw CSV",
     )
-    run_parser.set_defaults(handler=lambda args: print(run_pipeline(regenerate_raw=not args.use_existing_raw)))
+    run_parser.set_defaults(
+        handler=lambda args: print(
+            run_pipeline(regenerate_raw=not args.use_existing_raw)
+        )
+    )
 
     analyse_parser = subparsers.add_parser(
-        "analyse", help="Generate baseline, scenario and decision-summary outputs from processed data"
+        "analyse",
+        help="Generate baseline, scenario and decision-summary outputs from processed data",
     )
     analyse_parser.set_defaults(handler=lambda _args: print(analyse_pipeline()))
 
