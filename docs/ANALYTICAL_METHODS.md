@@ -20,7 +20,7 @@ The 60-minute threshold is a project convention for exploration. It is not a cli
 
 ## Time-of-day analysis
 
-The repository defines the Peak period as arrivals at 08:00 or 09:00, consistent with the current synthetic data configuration. The label is a grouping feature, not evidence that those hours cause delays. Arrival volume and wait metrics are displayed together to help identify periods for further investigation.
+The repository uses a shared reporting window for all departments: arrivals at 08:00 or 09:00 are labelled Peak. This is not each department's simulated arrival peak: Emergency is configured with an evening peak (18:00–21:59). The shared label is a grouping feature, not evidence that those hours cause delays. Arrival volume and wait metrics are displayed together to help identify periods for further investigation.
 
 ## Bootstrap confidence intervals
 
