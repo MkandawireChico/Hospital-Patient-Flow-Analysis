@@ -107,6 +107,7 @@ else:
     st.info("No demand events could be aligned to the selected workforce units and roster dates.")
 
 st.subheader("Observed service-stage waiting-time signals")
+st.caption("Stage waits are grouped by patient arrival shift because consistent service-start shift timestamps are not available. Use this to compare demand periods, not to infer which shift delivered the service.")
 service_wait_view = service_waits.loc[
     service_waits["Workforce_Unit"].isin(selected_departments)
 ].copy()
