@@ -144,3 +144,30 @@ def test_capacity_sensitivity_rejects_negative_or_missing_workforce_unit() -> No
         build_capacity_sensitivity(coverage, "Emergency", -1, 0, 1)
     with pytest.raises(ValueError, match="No demand-coverage records"):
         build_capacity_sensitivity(coverage, "Laboratory", 1, 0, 1)
+
+
+def test_service_wait_summary_maps_stage_waits_to_workforce_units() -> None:
+    from patient_flow.workforce import build_service_wait_summary
+
+    encounters = pd.DataFrame({
+        "Department": ["Outpatient Department", "Emergency", "Outpatient Department"],
+        "Wait_For_Consultation_Min": [20.0, 80.0, 40.0],
+        "Laboratory_Wait_Time": [100.0, None, 0.0],
+        "Pharmacy_Wait_Time": [None, 75.0, 0.0],
+        "Wait_For_Registration_Min": [5.0, 10.0, 15.0],
+        "Negative_Wait_Flag": [False, False, False],
+        "Impossible_Timestamp_Flag": [False, False, False],
+    })
+    result = build_service_wait_summary(encounters)
+    lab = result.loc[result["Workforce_Unit"].eq("Laboratory")].iloc[0]
+    pharmacy = result.loc[result["Workforce_Unit"].eq("Pharmacy")].iloc[0]
+    admin = result.loc[result["Workforce_Unit"].eq("Administration")].iloc[0]
+    opd = result.loc[
+        result["Workforce_Unit"].eq("Outpatient Department")
+        & result["Service_Stage"].eq("Consultation")
+    ].iloc[0]
+    assert lab["Service_Events"] == 2
+    assert lab["P90_Wait_Min"] == 90
+    assert pharmacy["Service_Events"] == 2
+    assert admin["Service_Events"] == 3
+    assert opd["Service_Events"] == 2
