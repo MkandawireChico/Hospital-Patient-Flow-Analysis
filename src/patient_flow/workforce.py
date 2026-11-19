@@ -153,7 +153,6 @@ def build_demand_coverage(
         demand_frames.append(grouped)
 
     demand = pd.concat(demand_frames, ignore_index=True)
-    demand["Encounter_Arrivals"] = demand["Demand_Events"]
     demand["Demand_Shift_Basis"] = "Arrival shift; service-stage shift is not observed"
     coverage = build_workforce_summary(roster)
     result = demand.merge(
@@ -164,11 +163,11 @@ def build_demand_coverage(
     )
     result["Staff_On_Duty"] = result["Staff_On_Duty"].fillna(0).astype(int)
     result["Scheduled_Hours"] = result["Scheduled_Hours"].fillna(0)
-    result["Encounters_Per_Staff"] = (
-        result["Encounter_Arrivals"] / result["Staff_On_Duty"].where(result["Staff_On_Duty"].gt(0))
+    result["Demand_Events_Per_Staff"] = (
+        result["Demand_Events"] / result["Staff_On_Duty"].where(result["Staff_On_Duty"].gt(0))
     )
-    result["Encounters_Per_Scheduled_Hour"] = (
-        result["Encounter_Arrivals"] / result["Scheduled_Hours"].where(result["Scheduled_Hours"].gt(0))
+    result["Demand_Events_Per_Scheduled_Hour"] = (
+        result["Demand_Events"] / result["Scheduled_Hours"].where(result["Scheduled_Hours"].gt(0))
     )
     result["Coverage_Status"] = result["Staff_On_Duty"].map(
         lambda count: "No rostered staff" if count == 0 else "Rostered"
