@@ -44,13 +44,15 @@ SELECT
     ROUND(SUM("Long_Wait_Flag") * 1.0 / COUNT(*), 4) AS long_wait_rate
 FROM encounters
 WHERE "Department" != 'Unknown'
+  AND "Total_Waiting_Time_Valid" IS NOT NULL
 GROUP BY "Department"
 ORDER BY long_wait_rate DESC;
 
 
 -- Q10: Waiting time by priority level, with a CASE-based readable label.
--- Business purpose: confirms triage is actually working as intended —
--- higher-priority patients should wait less, not just be labeled differently.
+-- Business purpose: describes how waits vary by recorded priority. The
+-- simulation uses first-come, first-served consultation queues; priority
+-- does not change queue order, so this is not a test of triage effectiveness.
 SELECT
     "Priority_Level",
     CASE
@@ -99,9 +101,10 @@ ORDER BY avg_lab_wait_minutes DESC;
 
 
 -- Q13: Waiting time and length of stay, admitted vs. discharged.
--- Business purpose: admitted patients are expected to have longer encounters
--- (higher acuity, more procedures) — this confirms it directly and quantifies
--- the gap for bed-planning purposes.
+-- Business purpose: describes how recorded waits and length of stay differ
+-- by disposition. The simulation adds a modelled stay component for admitted
+-- encounters, so a longer stay is partly built into the data-generating rules;
+-- this is not independent evidence of an admission effect.
 SELECT
     "Disposition",
     ROUND(AVG("Total_Waiting_Time_Valid"), 2) AS avg_wait_minutes,
