@@ -312,6 +312,7 @@ def _add_derived_fields(df: pd.DataFrame, config: dict[str, Any]) -> pd.DataFram
 def _inject_quality_issues(df: pd.DataFrame, config: dict[str, Any]) -> pd.DataFrame:
     output = df.copy()
     issue = config["simulation"]["issue_injection"]
+    rng = np.random.default_rng(int(issue["random_seed"]))
     missing_satisfaction = float(issue["missing_satisfaction_rate"])
     missing_referral = float(issue["missing_referral_rate"])
     duplicate_rate = float(issue["duplicate_rate"])
@@ -341,15 +342,15 @@ def _inject_quality_issues(df: pd.DataFrame, config: dict[str, Any]) -> pd.DataF
     negative_idx = output.sample(frac=negative_rate, random_state=states["negative_waits"]).index
     output.loc[negative_idx, "Total_Waiting_Time"] = (
         -np.abs(output.loc[negative_idx, "Total_Waiting_Time"])
-        - np.random.uniform(1, 20, len(negative_idx))
+        - rng.uniform(1, 20, len(negative_idx))
     )
     outlier_idx = output.sample(frac=outlier_rate, random_state=states["los_outliers"]).index
-    output.loc[outlier_idx, "Total_Length_of_Stay"] *= np.random.uniform(5, 8, len(outlier_idx))
+    output.loc[outlier_idx, "Total_Length_of_Stay"] *= rng.uniform(5, 8, len(outlier_idx))
     bad_department_idx = output.sample(
         frac=department_rate, random_state=states["department_errors"]
     ).index
     bad_department_values = issue["department_error_values"]
-    output.loc[bad_department_idx, "Department"] = np.random.choice(
+    output.loc[bad_department_idx, "Department"] = rng.choice(
         bad_department_values, size=len(bad_department_idx)
     )
     return output
