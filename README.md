@@ -100,6 +100,7 @@ Additional technical documentation:
 - [Analytical methods and metric definitions](docs/ANALYTICAL_METHODS.md)
 - [MWK costing guide](docs/MWK_COSTING_GUIDE.md)
 - [Portfolio case study](docs/PORTFOLIO_CASE_STUDY.md)
+- [Portfolio presentation and interview walkthrough](docs/PORTFOLIO_PRESENTATION.md)
 
 ## Project workflow
 
