@@ -1,4 +1,3 @@
-import pandas as pd
 import pytest
 
 from patient_flow.costing import calculate_staffing_budget, format_mwk
