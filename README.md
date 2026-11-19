@@ -86,6 +86,10 @@ The records include encounter and patient identifiers; visit dates and stage tim
 
 Thresholds and flags are operational heuristics. Scenario reductions are assumed percentages implemented as what-if transformations. Neither establishes a real-world causal effect. All results depend on the documented case-study assumptions and available fields.
 
+## Live deployment
+
+The Streamlit command centre can be deployed publicly with Streamlit Community Cloud. See the [deployment guide](docs/DEPLOYMENT.md) for the repository, branch, app entrypoint, Python version, first-time setup and post-deployment checks. The public app URL is assigned by Streamlit after deployment.
+
 ## Interactive dashboard
 
 The project includes a Streamlit command centre with interactive Plotly charts. It supports date, department, priority, visit-type, and disposition filters, and updates the KPI cards and visual analysis for the selected cohort.
