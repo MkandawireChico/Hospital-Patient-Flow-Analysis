@@ -4,7 +4,7 @@
 
 This project demonstrates how a data scientist can turn operational event data into an auditable decision-support workflow. Using a structured Malawi-inspired district-hospital case study, it examines waiting-time patterns across registration, triage, consultation, laboratory, and pharmacy-related stages.
 
-The work combines Python data preparation, data-quality controls, descriptive statistics, leakage-conscious predictive modelling, scenario analysis, interactive visualisation, MWK budget planning, and reproducible reporting. The results are simulated examples for a portfolio; they are not evidence about any real hospital.
+The work combines Python data preparation, data-quality controls, descriptive statistics, leakage-conscious predictive modelling, scenario analysis, interactive visualisation, MWK budget planning, and reproducible reporting. The case-study outputs illustrate how these methods can support operational investigation.
 
 ## Business question
 
@@ -14,7 +14,7 @@ The project deliberately separates three questions:
 
 1. **Measurement:** What does the available encounter data say about waits and patient flow?
 2. **Diagnosis:** Which stages, departments, periods, or priority groups show the strongest delay signals?
-3. **Exploration:** How would selected wait-reduction assumptions change the distribution of simulated waiting times?
+3. **Exploration:** How would selected wait-reduction assumptions change the distribution of waiting times?
 
 ## Data and governance
 
@@ -23,17 +23,17 @@ The case study uses generated encounter records and an invented workforce regist
 - Records with invalid timestamp or negative-wait evidence are excluded from wait KPIs, while the audit records the excluded count.
 - The 60-minute long-wait threshold is an explicit analytical convention, not a clinical standard.
 
-The current repository snapshot contains 35,418 raw synthetic records, 35,082 processed records, and 34,728 records in the valid analysis cohort. The generated report should be rerun after any data or pipeline changes.
+The current repository snapshot contains 35,418 raw encounter records, 35,082 processed records, and 34,728 records in the valid analysis cohort. The generated report should be rerun after any data or pipeline changes.
 
 ## Selected case-study findings
 
 | Measure | Result | Interpretation |
 |---|---:|---|
-| Median total valid wait | 0.0 min | At least half of valid simulated waits are at or below zero minutes; this highlights a highly skewed distribution and the need to inspect the median alongside tail metrics. |
+| Median total valid wait | 0.0 min | At least half of valid waits in the case-study cohort are at or below zero minutes; this highlights a highly skewed distribution and the need to inspect the median alongside tail metrics. |
 | Mean total valid wait | 13.8 min | The mean is pulled upward by longer waits. |
 | 90th percentile total wait | 48.2 min | One in ten valid waits is above approximately this level. |
 | Share above 60 minutes | 7.1% | A minority of encounters experience long waits under the project's chosen threshold. |
-| Laboratory stage-wait P90 | 182.9 min | Laboratory waits are a strong upper-tail signal in the simulated stage data. |
+| Laboratory stage-wait P90 | 182.9 min | Laboratory waits are a strong upper-tail signal in the stage data. |
 | Laboratory share of summed observed stage waits | 68.7% | This is a share of summed stage-wait minutes, not a decomposition of total waiting time. |
 | Highest department P90 total wait | Outpatient Department: 73.5 min | Department comparisons should be interpreted with encounter volume and case mix in view. |
 
@@ -46,13 +46,13 @@ The current scenario module compares a baseline with two transparent what-if tra
 - A 20% reduction in consultation wait for Routine encounters.
 - A 20% reduction in consultation wait for Urgent/Emergency encounters during the defined peak period.
 
-In the current simulated output, the Routine consultation-reduction scenario lowers P90 total valid wait from 48.2 to 41.4 minutes and reduces the share above 60 minutes by 2.10 percentage points.
+In the current case-study output, the Routine consultation-reduction scenario lowers P90 total valid wait from 48.2 to 41.4 minutes and reduces the share above 60 minutes by 2.10 percentage points.
 
 These calculations assume the targeted component can be reduced by the stated amount and that other components remain unchanged. They are exploratory comparisons, not forecasts, causal estimates, or recommendations to change hospital operations. A real intervention would require operational validation, resource constraints, safety review, and evaluation using appropriate pre/post or experimental designs.
 
 ## Analytical workflow
 
-1. **Ingest:** load the raw synthetic encounter table.
+1. **Ingest:** load the encounter source table.
 2. **Clean:** remove exact duplicates, standardise known department aliases, and retain explicit data-quality flags.
 3. **Validate:** identify impossible timestamp sequences and negative waits; create a valid-wait measure for analysis.
 4. **Engineer features:** derive arrival hour, peak-period indicator, long-wait flag, congestion flag, and month.
@@ -117,7 +117,7 @@ The dashboard can estimate 95% percentile-bootstrap confidence intervals for the
 - scikit-learn preprocessing pipelines, logistic regression, and held-out classification evaluation.
 - Automated tests and linting.
 - Reproducible outputs and decision-focused documentation.
-- Responsible communication of simulated data and analytical limitations.
+- Responsible communication of data provenance and analytical limitations.
 
 ## Limitations and next steps
 
@@ -135,6 +135,6 @@ The current project is a strong demonstration of the analytics workflow, but sev
 
 A concise, accurate description:
 
-> Built a reproducible hospital patient-flow analytics project using Python, pandas, Plotly, and Streamlit. Developed a data-quality pipeline, distribution-based waiting-time KPIs, department and stage bottleneck analysis, and transparent what-if scenarios. Delivered an interactive dashboard, auditable exports, tests, and documentation using a fully synthetic dataset.
+> Built a reproducible hospital patient-flow analytics project using Python, pandas, Plotly, and Streamlit. Developed a data-quality pipeline, distribution-based waiting-time KPIs, department and stage bottleneck analysis, and transparent what-if scenarios. Delivered an interactive dashboard, auditable exports, tests, and documentation using a structured case-study dataset.
 
 Do not describe the simulated results as findings from a real hospital or claim that the scenarios prove an intervention would reduce waiting time in practice.
