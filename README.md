@@ -29,6 +29,7 @@ Patients move through connected stages such as registration, triage, consultatio
 See [`docs/PORTFOLIO_CASE_STUDY.md`](docs/PORTFOLIO_CASE_STUDY.md) for the employer-facing project story, selected simulated findings, methods, technical skills, limitations, and a concise CV-ready project description.
 
 Additional technical documentation:
+- [Project architecture](docs/ARCHITECTURE.md)
 - [Dashboard user guide](docs/DASHBOARD_USER_GUIDE.md)
 - [Analytical methods and metric definitions](docs/ANALYTICAL_METHODS.md)
 - [MWK costing guide](docs/MWK_COSTING_GUIDE.md)
