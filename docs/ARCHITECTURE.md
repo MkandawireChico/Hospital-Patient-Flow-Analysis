@@ -48,6 +48,7 @@ results/*.csv and reports/*.md
 | `src/patient_flow/analysis.py` | Descriptive summaries, cohort audit, and report exports. |
 | `src/patient_flow/scenarios.py` | Transparent what-if transformations and comparisons. |
 | `src/patient_flow/uncertainty.py` | Reproducible percentile-bootstrap confidence intervals. |
+| `src/patient_flow/prediction.py` | Leakage-conscious logistic-regression baseline for long-wait classification. |
 | `src/patient_flow/costing.py` | MWK-only staffing budget arithmetic. |
 | `dashboard/app.py` | Interactive Streamlit and Plotly user interface. |
 | `tests/` | Regression tests for analysis flags, cost arithmetic, and uncertainty estimates. |
