@@ -8,7 +8,13 @@ from patient_flow.config import PROJECT_ROOT
 
 STAFF_PATH = PROJECT_ROOT / "data" / "reference" / "staff_directory_synthetic.csv"
 ROSTER_PATH = PROJECT_ROOT / "data" / "reference" / "staff_roster_synthetic.csv"
+ENCOUNTER_PATH = PROJECT_ROOT / "data" / "processed" / "hospital_patient_flow_clean.csv"
 SHIFT_HOURS = 8
+SHIFT_WINDOWS = {
+    "DAY": (7, 15),
+    "EVENING": (15, 23),
+    "NIGHT": (23, 7),
+}
 
 
 def generate_monthly_roster(
@@ -16,7 +22,7 @@ def generate_monthly_roster(
     start_date: str = "2026-01-01",
     days: int = 28,
 ) -> pd.DataFrame:
-    """Build a deterministic illustrative roster; it is not a validated safe-staffing plan."""
+    """Build a deterministic illustrative roster for workforce planning analysis."""
     if days < 1:
         raise ValueError("days must be at least one")
     required = {"Staff_ID", "Staff_Name", "Job_Title", "Department"}
@@ -32,13 +38,9 @@ def generate_monthly_roster(
         rotating = department in rotating_departments
         for day_offset in range(days):
             day = start + pd.Timedelta(days=day_offset)
-            # Each person receives two staggered rest days in each seven-day cycle.
             weekday_slot = (day_offset + staff_index * 2) % 7
             if weekday_slot in {5, 6}:
-                shift = "OFF"
-                start_time = ""
-                end_time = ""
-                hours = 0
+                shift, start_time, end_time, hours = "OFF", "", "", 0
             else:
                 shift_index = (day_offset // 7 + staff_index) % 3
                 if rotating:
@@ -49,8 +51,7 @@ def generate_monthly_roster(
                         "NIGHT": ("23:00", "07:00"),
                     }[shift]
                 else:
-                    shift = "DAY"
-                    start_time, end_time = "07:00", "15:00"
+                    shift, start_time, end_time = "DAY", "07:00", "15:00"
                 hours = SHIFT_HOURS
             records.append(
                 {
@@ -84,14 +85,90 @@ def build_workforce_summary(roster: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def assign_arrival_shift(hours: pd.Series) -> pd.Series:
+    """Map arrival hour to the roster's day, evening or overnight shift windows."""
+    numeric = pd.to_numeric(hours, errors="coerce")
+    return pd.Series(
+        pd.cut(
+            numeric.mod(24),
+            bins=[-0.001, 6.999, 14.999, 22.999, 24],
+            labels=["NIGHT", "DAY", "EVENING", "NIGHT"],
+            right=True,
+            ordered=False,
+        ).astype("string"),
+        index=hours.index,
+    )
+
+
+def build_demand_coverage(
+    encounters: pd.DataFrame,
+    roster: pd.DataFrame,
+) -> pd.DataFrame:
+    """Join encounter arrivals to scheduled shift headcount by date and department.
+
+    Encounters per staff member is a workload indicator, not a measure of clinical
+    productivity, acuity-adjusted capacity, or a safe-staffing threshold.
+    """
+    required = {"Department", "Arrival_Time"}
+    missing = required.difference(encounters.columns)
+    if missing:
+        raise ValueError(f"Encounter data is missing columns: {sorted(missing)}")
+    frame = encounters.copy()
+    arrival = pd.to_datetime(frame["Arrival_Time"], errors="coerce")
+    frame["Roster_Date"] = arrival.dt.strftime("%Y-%m-%d")
+    frame["Shift"] = assign_arrival_shift(arrival.dt.hour)
+    demand = (
+        frame.dropna(subset=["Roster_Date", "Department", "Shift"])
+        .groupby(["Roster_Date", "Department", "Shift"], as_index=False)
+        .size()
+        .rename(columns={"size": "Encounter_Arrivals"})
+    )
+    coverage = build_workforce_summary(roster)
+    result = demand.merge(
+        coverage,
+        on=["Roster_Date", "Department", "Shift"],
+        how="left",
+        validate="one_to_one",
+    )
+    result["Staff_On_Duty"] = result["Staff_On_Duty"].fillna(0).astype(int)
+    result["Scheduled_Hours"] = result["Scheduled_Hours"].fillna(0)
+    result["Encounters_Per_Staff"] = (
+        result["Encounter_Arrivals"] / result["Staff_On_Duty"].where(result["Staff_On_Duty"].gt(0))
+    )
+    result["Encounters_Per_Scheduled_Hour"] = (
+        result["Encounter_Arrivals"] / result["Scheduled_Hours"].where(result["Scheduled_Hours"].gt(0))
+    )
+    result["Coverage_Status"] = result["Staff_On_Duty"].map(
+        lambda count: "No rostered staff" if count == 0 else "Rostered"
+    )
+    return result.sort_values(
+        ["Roster_Date", "Department", "Shift"]
+    ).reset_index(drop=True)
+
+
 def ensure_roster(
     staff_path: Path = STAFF_PATH,
     roster_path: Path = ROSTER_PATH,
-    start_date: str = "2026-01-01",
-    days: int = 28,
+    start_date: str | None = None,
+    days: int | None = None,
+    encounter_path: Path = ENCOUNTER_PATH,
 ) -> pd.DataFrame:
-    """Load the committed synthetic register and reproducibly create its roster."""
+    """Create a reproducible roster aligned to the encounter data's date range."""
     staff = pd.read_csv(staff_path)
+    if start_date is None or days is None:
+        if encounter_path.exists():
+            dates = pd.to_datetime(
+                pd.read_csv(encounter_path, usecols=["Visit_Date"])["Visit_Date"],
+                errors="coerce",
+            ).dropna()
+        else:
+            dates = pd.Series(dtype="datetime64[ns]")
+        if dates.empty:
+            start_date = start_date or "2026-01-01"
+            days = days or 28
+        else:
+            start_date = start_date or dates.min().strftime("%Y-%m-%d")
+            days = days or int((dates.max().normalize() - dates.min().normalize()).days + 1)
     roster = generate_monthly_roster(staff, start_date=start_date, days=days)
     roster_path.parent.mkdir(parents=True, exist_ok=True)
     roster.to_csv(roster_path, index=False)
@@ -100,4 +177,4 @@ def ensure_roster(
 
 if __name__ == "__main__":
     generated = ensure_roster()
-    print(f"Generated {len(generated):,} synthetic roster assignments at {ROSTER_PATH}")
+    print(f"Generated {len(generated):,} roster assignments at {ROSTER_PATH}")
