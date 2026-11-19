@@ -6,6 +6,10 @@ The baseline analysis uses the processed synthetic encounter dataset. Rows with 
 
 The audit records the input row count, exclusions, retained cohort size, and missing total waits. A row may be excluded because more than one quality issue is present; the exclusion count is a count of unique excluded rows, not a sum of issue categories.
 
+## Simulation configuration and reproducibility
+
+The encounter generator reads its model assumptions from `config/default.yaml`: department demand and opening hours, daytime and Emergency arrival weights, staffing and triangular service-time distributions, shared-service capacity, priority and admission probabilities, demographic distributions, referral and visit-type mix, admission stay increments, satisfaction-score parameters, and data-quality issue rates, replacement values, magnitudes, and random seeds. The configuration loader validates probability sums, ranges, staffing counts, service durations, and other bounds before generation. The encounter seed and quality-injection seed are independent so the placement and magnitude of data-quality issues can be reproduced without changing the underlying encounter-generation stream. These settings define the case-study model; changing them changes the generated population and therefore the analytical results.
+
 ## Waiting-time metrics
 
 - **Mean:** arithmetic average of non-missing valid wait observations.
