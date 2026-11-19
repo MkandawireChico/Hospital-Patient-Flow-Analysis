@@ -381,7 +381,12 @@ def generate_and_save_raw_dataset(
     _, raw = generate_case_study_data(config_file)
     configured_path = Path(config["paths"]["raw"])
     if not configured_path.is_absolute():
-        configured_path = config_file.resolve().parents[1] / configured_path
+        config_root = (
+            config_module.PROJECT_ROOT
+            if config_file.resolve() == config_module.DEFAULT_CONFIG_PATH.resolve()
+            else config_file.resolve().parent
+        )
+        configured_path = config_root / configured_path
     target = Path(output_path) if output_path else configured_path
     if not target.is_absolute():
         target = Path.cwd() / target
