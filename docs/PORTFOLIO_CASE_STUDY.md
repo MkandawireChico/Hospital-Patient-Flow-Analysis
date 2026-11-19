@@ -71,7 +71,7 @@ The Streamlit application supports:
 - Waiting-time distribution and threshold marker.
 - Department-level P90 comparisons with encounter volume context.
 - Hourly arrivals alongside upper-tail waiting time.
-- Monthly median/P90 trend.
+- Monthly median/P90 trend and department-by-arrival-hour heatmap with encounter-count context.
 - Stage-level wait comparisons and priority breakdowns.
 - Baseline versus what-if scenario charts.
 - Data-quality audit counts and filtered CSV export.
