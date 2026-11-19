@@ -10,9 +10,9 @@ paths:
 simulation:
   start_date: "2025-01-01"
   n_days: 365
-  weekend_multiplier: 1.0
   departments:
     Outpatient Department:
+      weekend_multiplier: 0.5
       daily_mean: 45
       open: [7, 16]
       peak: [8, 9]
@@ -28,6 +28,7 @@ simulation:
       priority_distribution: {Routine: 0.80, Urgent: 0.18, Emergency: 0.02}
       admission_probability: {Routine: 0.01, Urgent: 0.04, Emergency: 0.15}
     Emergency:
+      weekend_multiplier: 1.0
       daily_mean: 16
       open: [0, 24]
       peak: [18, 21]
@@ -43,6 +44,7 @@ simulation:
       priority_distribution: {Routine: 0.10, Urgent: 0.40, Emergency: 0.50}
       admission_probability: {Routine: 0.05, Urgent: 0.20, Emergency: 0.45}
     Maternal Health:
+      weekend_multiplier: 0.5
       daily_mean: 11
       open: [7, 16]
       peak: [8, 9]
@@ -58,6 +60,7 @@ simulation:
       priority_distribution: {Routine: 0.70, Urgent: 0.25, Emergency: 0.05}
       admission_probability: {Routine: 0.03, Urgent: 0.10, Emergency: 0.35}
     Paediatrics:
+      weekend_multiplier: 0.5
       daily_mean: 22
       open: [7, 16]
       peak: [8, 9]
@@ -73,6 +76,7 @@ simulation:
       priority_distribution: {Routine: 0.75, Urgent: 0.20, Emergency: 0.05}
       admission_probability: {Routine: 0.02, Urgent: 0.08, Emergency: 0.25}
     Chronic Care:
+      weekend_multiplier: 0.3
       daily_mean: 9
       open: [7, 15]
       peak: [8, 9]
@@ -88,6 +92,7 @@ simulation:
       priority_distribution: {Routine: 0.85, Urgent: 0.13, Emergency: 0.02}
       admission_probability: {Routine: 0.02, Urgent: 0.06, Emergency: 0.20}
     TB/HIV Clinic:
+      weekend_multiplier: 0.3
       daily_mean: 8
       open: [7, 15]
       peak: [8, 9]
