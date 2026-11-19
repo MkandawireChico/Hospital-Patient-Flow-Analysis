@@ -311,6 +311,39 @@ def main() -> None:
         else:
             add_empty_state("Visit dates are not available.")
 
+    if "Department" in cohort.columns and "Arrival_Hour" in cohort.columns:
+        st.subheader("Congestion heatmap: department by arrival hour")
+        heat_data = cohort.copy()
+        heat_data["_hour"] = pd.to_numeric(heat_data["Arrival_Hour"], errors="coerce")
+        heat_data["_wait"] = pd.to_numeric(heat_data[wait_col], errors="coerce")
+        heat_data = heat_data.dropna(subset=["_hour", "_wait", "Department"])
+        if not heat_data.empty:
+            heat_summary = heat_data.pivot_table(
+                index="Department",
+                columns="_hour",
+                values="_wait",
+                aggfunc="median",
+            )
+            chart = px.imshow(
+                heat_summary,
+                aspect="auto",
+                text_auto=".1f",
+                color_continuous_scale="YlOrRd",
+                title="Median valid wait (minutes) by department and arrival hour",
+                labels={
+                    "x": "Arrival hour",
+                    "y": "Department",
+                    "color": "Median wait (minutes)",
+                },
+            )
+            st.plotly_chart(chart, use_container_width=True)
+            st.caption(
+                "Cells show the median among encounters with a valid wait. Sparse cells should be "
+                "interpreted alongside encounter counts; this heatmap is descriptive, not causal."
+            )
+        else:
+            add_empty_state("Not enough department, arrival-hour, and valid-wait data for a heatmap.")
+
     st.divider()
     stage_left, stage_right = st.columns(2)
     with stage_left:
