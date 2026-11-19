@@ -83,7 +83,7 @@ if not coverage_view.empty:
     valid_workload = coverage_view.dropna(subset=["Demand_Events_Per_Staff"])
     if not valid_workload.empty:
         st.plotly_chart(
-            px.box(valid_workload, x="Department", y="Encounters_Per_Staff", color="Shift",
+            px.box(valid_workload, x="Department", y="Demand_Events_Per_Staff", color="Shift",
                    title="Distribution of demand events per rostered staff member and shift",
                    points=False),
             use_container_width=True,
