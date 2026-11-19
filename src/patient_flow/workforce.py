@@ -104,10 +104,10 @@ def build_demand_coverage(
     encounters: pd.DataFrame,
     roster: pd.DataFrame,
 ) -> pd.DataFrame:
-    """Join encounter arrivals to scheduled shift headcount by date and department.
+    """Join encounter and service-stage demand events to rostered shift coverage.
 
-    Encounters per staff member is a workload indicator, not a measure of clinical
-    productivity, acuity-adjusted capacity, or a safe-staffing threshold.
+    Demand events per staff member are descriptive workload indicators, not
+    clinical productivity, acuity-adjusted capacity, or safe-staffing thresholds.
     """
     required = {"Department", "Arrival_Time"}
     missing = required.difference(encounters.columns)
