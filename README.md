@@ -119,6 +119,16 @@ For the costing method and input governance, see [the MWK costing guide](docs/MW
 
 The dashboard includes a staffing budget planner denominated in **MWK** and an optional long-wait classification model built with scikit-learn. Enter locally verified monthly fully loaded staff costs and additional FTE assumptions to calculate monthly and multi-month staffing budgets. No USD conversion or unverified salary estimates are built in. The dashboard also offers optional 95% bootstrap confidence intervals for median wait, P90 wait, and long-wait share.
 
+## Workforce and staff scheduling
+
+The project includes a **40-person fictional staff directory** and a reproducible 28-day shift roster covering clinical, nursing, laboratory, pharmacy, administration, community-health and support roles. The Workforce & Roster dashboard page explores staff mix, departmental establishment, shift coverage, scheduled hours, and downloadable staff/roster CSVs. See [the workforce analytics guide](docs/WORKFORCE_ANALYTICS.md) and [the synthetic workforce data dictionary](docs/WORKFORCE_DATA_DICTIONARY.md). All names and assignments are invented; this is not a real HR register or a safe-staffing recommendation. No salaries are included; all cost assumptions remain configurable in MWK using verified local inputs.
+
+Generate the roster from the staff directory with:
+
+```bash
+python -m patient_flow.workforce
+```
+
 ## Power BI
 
 [`dashboard/powerbi_dashboard_guide.md`](dashboard/powerbi_dashboard_guide.md) documents a dashboard design based on the processed data and generated outputs, including model considerations, measures, report views, and filters. It does not present simulated results as real clinical evidence.
