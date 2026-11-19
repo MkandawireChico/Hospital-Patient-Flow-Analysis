@@ -142,6 +142,26 @@ Additional technical documentation:
 - **Scenario comparison:** compare the baseline with two consultation-wait interventions on the same valid analysis cohort.
 - **Exports:** write result tables and a generated decision summary for review.
 
+## Configuring the simulation
+
+The full encounter model is controlled from [`config/default.yaml`](config/default.yaml). It includes department volumes and hours, staff and service capacity, shared laboratory/pharmacy queues, demographic and visit-type distributions, arrival patterns, satisfaction and length-of-stay assumptions, and data-quality injection rates and seeds. The loader validates probability distributions and parameter bounds before generating records.
+
+To experiment without changing the default model, copy the YAML file, edit the copy (for example, reduce `simulation.n_days` for a shorter run), and pass its path to the Python API:
+
+```python
+from patient_flow.simulation import generate_case_study_data
+
+clean_encounters, raw_encounters = generate_case_study_data("config/my_experiment.yaml")
+```
+
+The CLI uses `config/default.yaml` by default:
+
+```bash
+python -m patient_flow.cli run
+```
+
+The encounter-generation seed and data-quality injection seed are separate. Repeating a run with the same configuration reproduces the same clean and raw datasets.
+
 ## Repository structure
 
 ```text
