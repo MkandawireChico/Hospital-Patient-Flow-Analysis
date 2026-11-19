@@ -16,6 +16,7 @@ from patient_flow.workforce import (  # noqa: E402
     ENCOUNTER_PATH,
     STAFF_PATH,
     build_demand_coverage,
+    build_service_wait_summary,
     build_workforce_summary,
     ensure_roster,
 )
@@ -36,6 +37,7 @@ encounters = pd.read_csv(ENCOUNTER_PATH)
 roster = ensure_roster()
 summary = build_workforce_summary(roster)
 coverage = build_demand_coverage(encounters, roster)
+service_waits = build_service_wait_summary(encounters)
 
 st.sidebar.header("Workforce filters")
 departments = sorted(staff["Department"].dropna().unique().tolist())
@@ -103,6 +105,37 @@ if not coverage_view.empty:
                        "workforce_demand_coverage.csv", "text/csv")
 else:
     st.info("No demand events could be aligned to the selected workforce units and roster dates.")
+
+st.subheader("Observed service-stage waiting-time signals")
+service_wait_view = service_waits.loc[
+    service_waits["Workforce_Unit"].isin(selected_departments)
+].copy()
+if not service_wait_view.empty:
+    st.plotly_chart(
+        px.bar(
+            service_wait_view,
+            x="Workforce_Unit",
+            y="P90_Wait_Min",
+            color="Service_Stage",
+            barmode="group",
+            title="P90 observed stage wait by workforce unit",
+            labels={
+                "Workforce_Unit": "Workforce unit",
+                "P90_Wait_Min": "P90 wait (minutes)",
+                "Service_Stage": "Service stage",
+            },
+        ),
+        use_container_width=True,
+    )
+    st.dataframe(service_wait_view, use_container_width=True, hide_index=True)
+    st.download_button(
+        "Download service-stage wait summary",
+        data=service_wait_view.to_csv(index=False).encode("utf-8"),
+        file_name="workforce_service_wait_summary.csv",
+        mime="text/csv",
+    )
+else:
+    st.info("No observed stage-wait fields are available for the selected workforce units.")
 
 st.divider()
 st.subheader("Workforce capacity sensitivity")
