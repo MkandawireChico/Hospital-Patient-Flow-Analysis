@@ -128,7 +128,7 @@ python -m patient_flow.workforce
 
 ## Power BI
 
-[`dashboard/powerbi_dashboard_guide.md`](dashboard/powerbi_dashboard_guide.md) documents a dashboard design based on the processed data and generated outputs, including model considerations, measures, report views, and filters. It does not present simulated results as real clinical evidence.
+[`dashboard/powerbi_dashboard_guide.md`](dashboard/powerbi_dashboard_guide.md) documents a dashboard design based on the processed data and generated outputs, including model considerations, measures, report views, and filters. It keeps case-study outputs distinct from evidence about operating clinical services.
 
 ## How to reproduce
 
