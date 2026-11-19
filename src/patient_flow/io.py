@@ -5,10 +5,18 @@ from typing import Any
 
 import pandas as pd
 
-from patient_flow.config import PROJECT_ROOT
+from patient_flow.config import PROJECT_ROOT, load_default_config
 
-RAW_DATA_PATH = PROJECT_ROOT / "data" / "raw" / "hospital_patient_flow_synthetic.csv"
-PROCESSED_DATA_PATH = PROJECT_ROOT / "data" / "processed" / "hospital_patient_flow_clean.csv"
+_PATH_CONFIG = load_default_config()["paths"]
+
+
+def _project_path(configured_path: str) -> Path:
+    path = Path(configured_path)
+    return path if path.is_absolute() else PROJECT_ROOT / path
+
+
+RAW_DATA_PATH = _project_path(_PATH_CONFIG["raw"])
+PROCESSED_DATA_PATH = _project_path(_PATH_CONFIG["processed"])
 
 
 def ensure_data_files() -> tuple[Path, Path]:
