@@ -1,3 +1,6 @@
+# Reference configuration only: the notebook currently generates the committed raw CSV
+# independently, and the CLI does not load this file. Keep these values aligned with
+# the notebook until raw-data generation is moved into a configuration-driven module.
 project:
   name: "Chilungamo District Hospital"
   synthetic: true
@@ -66,6 +69,6 @@ simulation:
   issue_injection:
     duplicate_rate: 0.01
     department_error_rate: 0.003
-    impossible_timestamp_rate: 0.002
-    negative_wait_rate: 0.001
-    los_outlier_rate: 0.02
+    impossible_timestamp_rate: 0.005
+    negative_wait_rate: 0.005
+    los_outlier_rate: 0.005
