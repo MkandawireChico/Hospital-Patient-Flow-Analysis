@@ -43,7 +43,7 @@ st.set_page_config(
 )
 
 
-@st.cache_data(show_spinner="Loading synthetic encounter data…")
+@st.cache_data(show_spinner="Loading encounter data…")
 def load_data(path: str, modified_time: float) -> pd.DataFrame:
     """Load the processed encounter table; mtime invalidates the cache after a pipeline run."""
     del modified_time
@@ -81,12 +81,7 @@ def cached_prediction_summary(frame: pd.DataFrame) -> dict[str, object]:
 def main() -> None:
     st.title("Hospital Operations Command Centre")
     st.caption(
-        "An interactive operational analytics view of a fictional, Malawi-inspired district "
-        "hospital. All records are synthetic; this is a portfolio simulation, not live hospital data."
-    )
-    st.warning(
-        "Synthetic-data notice: Chilungamo District Hospital is fictional. These charts describe "
-        "the simulation only and must not be interpreted as evidence about a real facility."
+        "An integrated case study in patient-flow performance, workforce planning and operational decision support."
     )
 
     if not DATA_PATH.exists():
