@@ -20,7 +20,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from patient_flow.analysis import filter_analysis_frame
+from patient_flow.analysis import LONG_WAIT_THRESHOLD_MINUTES, filter_analysis_frame
 
 
 TARGET_COLUMN = "Long_Wait_Target"
@@ -50,7 +50,7 @@ def prepare_prediction_frame(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]
     valid = waits.notna()
     analysis = analysis.loc[valid].copy()
     waits = waits.loc[valid]
-    target = waits.gt(60.0).astype(int).rename("Long_Wait_Target")
+    target = waits.gt(LONG_WAIT_THRESHOLD_MINUTES).astype(int).rename("Long_Wait_Target")
 
     if "Arrival_Hour" not in analysis.columns and "Arrival_Time" in analysis.columns:
         analysis["Arrival_Hour"] = pd.to_datetime(
