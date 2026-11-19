@@ -1,6 +1,6 @@
-# Synthetic workforce register
+# Workforce register
 
-This register contains 40 fictional staff profiles created for the Chilungamo District Hospital simulation. Every name, identifier, employment date and role assignment is synthetic; no real employee records or contact details are represented. It is for workforce analytics demonstrations, not real HR administration.
+This register contains 40 staff profiles created for the Chilungamo District Hospital case study. Names, identifiers, employment dates and role assignments are generated case-study values, not employee records. The register is for workforce analytics demonstrations, not live HR administration.
 
 ## Fields
 
