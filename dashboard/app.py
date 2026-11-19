@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
@@ -20,11 +20,11 @@ from patient_flow.analysis import (  # noqa: E402
     summarise_waits_by_department,
     summarise_waits_by_stage,
 )
+from patient_flow.costing import calculate_staffing_budget, format_mwk  # noqa: E402
 from patient_flow.scenarios import (  # noqa: E402
     build_scenario_comparison,
     build_scenario_department_effects,
 )
-from patient_flow.costing import calculate_staffing_budget, format_mwk  # noqa: E402
 from patient_flow.uncertainty import bootstrap_wait_confidence_intervals  # noqa: E402
 
 DATA_PATH = PROJECT_ROOT / "data" / "processed" / "hospital_patient_flow_clean.csv"
