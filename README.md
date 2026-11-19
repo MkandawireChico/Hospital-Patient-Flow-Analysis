@@ -76,6 +76,31 @@ The records include encounter and patient identifiers; visit dates and stage tim
 
 Thresholds and flags are operational heuristics. Scenario reductions are assumed percentages implemented as what-if transformations. Neither establishes a real-world causal effect. All results depend on the simulation assumptions and the available synthetic fields.
 
+## Interactive dashboard
+
+The project includes a Streamlit command centre with interactive Plotly charts. It supports date, department, priority, visit-type, and disposition filters, and updates the KPI cards and visual analysis for the selected cohort.
+
+### Dashboard views
+
+- **Performance overview:** encounter volume, mean and median valid wait, 90th-percentile wait, and the share above the 60-minute threshold.
+- **Wait distribution:** histogram with a box-plot marginal and the long-wait threshold.
+- **Department bottlenecks:** department-level P90 waits with encounter-volume context.
+- **Arrival pressure:** hourly encounter volume alongside P90 wait, plus monthly median/P90 trends.
+- **Stage and priority analysis:** stage-specific P90 waits, observed stage-wait contribution, and priority comparisons.
+- **What-if scenarios:** overall P90 and long-wait-share comparisons, plus department-level median changes.
+- **Data quality:** timestamp, negative-wait, department-label, and length-of-stay audit counts.
+- **Filtered export:** inspect and download the filtered encounter cohort as CSV.
+
+Run the dashboard from the repository root after installing the project dependencies and generating the processed dataset:
+
+```bash
+python -m pip install -r requirements.txt
+python -m patient_flow.cli run
+streamlit run dashboard/app.py
+```
+
+Alternatively, use `make dashboard` where Make is available. The dashboard reads `data/processed/hospital_patient_flow_clean.csv`; rerun the pipeline after changing the source data. Every dashboard view retains the synthetic-data disclaimer. Scenario comparisons are illustrative what-if calculations, not causal estimates or operational forecasts.
+
 ## Power BI
 
 [`dashboard/powerbi_dashboard_guide.md`](dashboard/powerbi_dashboard_guide.md) documents a dashboard design based on the processed data and generated outputs, including model considerations, measures, report views, and filters. It does not present simulated results as real clinical evidence.
