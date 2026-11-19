@@ -43,6 +43,7 @@ WITH dept_metrics AS (
         AVG("Total_Length_of_Stay") AS avg_los
     FROM encounters
     WHERE "Department" != 'Unknown'
+      AND "Total_Waiting_Time_Valid" IS NOT NULL
     GROUP BY "Department"
 ),
 ranked AS (
