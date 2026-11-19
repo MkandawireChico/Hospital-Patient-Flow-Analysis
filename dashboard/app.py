@@ -540,9 +540,21 @@ def main() -> None:
                 key=f"budget_cost_{role}",
                 help="Enter a verified local monthly cost including employer on-costs where appropriate.",
             )
+            cost_source = st.text_input(
+                "Cost source / payroll reference",
+                key=f"budget_source_{role}",
+                placeholder="e.g. approved payroll scale or finance estimate",
+            )
+            effective_date = st.text_input(
+                "Effective date (YYYY-MM-DD)",
+                key=f"budget_date_{role}",
+                placeholder="YYYY-MM-DD",
+            )
             budget_inputs[role] = {
                 "additional_staff": staff_count,
                 "monthly_cost_mwk": monthly_cost,
+                "cost_source": cost_source,
+                "effective_date": effective_date,
             }
 
     budget = calculate_staffing_budget(budget_inputs, months=int(budget_months))
