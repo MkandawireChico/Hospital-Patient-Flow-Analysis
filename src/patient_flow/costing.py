@@ -32,6 +32,11 @@ def calculate_staffing_budget(
         if additional_staff < 0 or monthly_cost < 0:
             raise ValueError("Staff counts and monthly costs cannot be negative")
         monthly_total = additional_staff * monthly_cost
+        cost_source = str(values.get("cost_source", "")).strip()
+        effective_date = str(values.get("effective_date", "")).strip()
+        date_is_valid = bool(effective_date) and pd.notna(
+            pd.to_datetime(effective_date, errors="coerce")
+        )
         rows.append(
             {
                 "role": str(role),
@@ -40,8 +45,9 @@ def calculate_staffing_budget(
                 "monthly_total_mwk": monthly_total,
                 "budget_period_months": months,
                 "period_total_mwk": monthly_total * months,
-                "cost_source": str(values.get("cost_source", "")),
-                "effective_date": str(values.get("effective_date", "")),
+                "cost_source": cost_source,
+                "effective_date": effective_date,
+                "assumption_complete": bool(cost_source and date_is_valid),
             }
         )
 
@@ -56,6 +62,7 @@ def calculate_staffing_budget(
             "period_total_mwk",
             "cost_source",
             "effective_date",
+            "assumption_complete",
         ],
     )
 
