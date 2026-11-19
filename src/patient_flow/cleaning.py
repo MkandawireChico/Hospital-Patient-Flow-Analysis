@@ -4,6 +4,8 @@ from typing import Iterable
 
 import pandas as pd
 
+from patient_flow.flags import boolean_flag_column
+
 DEFAULT_NEGATIVE_WAIT_COLUMNS = [
     "Wait_For_Registration_Min",
     "Wait_For_Triage_Min",
@@ -125,9 +127,8 @@ def compute_valid_waits(df: pd.DataFrame) -> pd.DataFrame:
         return output
 
     valid_wait = pd.to_numeric(output["Total_Waiting_Time"], errors="coerce")
-    invalid_mask = output.get("Negative_Wait_Flag", pd.Series(False, index=output.index))
-    invalid_mask = invalid_mask.fillna(False).astype(bool)
-    invalid_mask |= output.get("Impossible_Timestamp_Flag", pd.Series(False, index=output.index)).fillna(False).astype(bool)
+    invalid_mask = boolean_flag_column(output, "Negative_Wait_Flag")
+    invalid_mask |= boolean_flag_column(output, "Impossible_Timestamp_Flag")
     output["Total_Waiting_Time_Valid"] = valid_wait.where(~invalid_mask, pd.NA)
     return output
 
@@ -200,9 +201,9 @@ def detect_data_quality_issues(df: pd.DataFrame) -> dict[str, int]:
     """Return the issue counts used in the project audit summary."""
     issues = {
         "duplicate_rows": int(df.duplicated().sum()),
-        "impossible_timestamps": int(df.get("Impossible_Timestamp_Flag", pd.Series(False, index=df.index)).fillna(False).astype(bool).sum()),
-        "negative_waits": int(df.get("Negative_Wait_Flag", pd.Series(False, index=df.index)).fillna(False).astype(bool).sum()),
-        "department_errors": int(df.get("Department_Data_Error", pd.Series(False, index=df.index)).fillna(False).astype(bool).sum()),
-        "los_outliers": int(df.get("LOS_Outlier_Flag", pd.Series(False, index=df.index)).fillna(False).astype(bool).sum()),
+        "impossible_timestamps": int(boolean_flag_column(df, "Impossible_Timestamp_Flag").sum()),
+        "negative_waits": int(boolean_flag_column(df, "Negative_Wait_Flag").sum()),
+        "department_errors": int(boolean_flag_column(df, "Department_Data_Error").sum()),
+        "los_outliers": int(boolean_flag_column(df, "LOS_Outlier_Flag").sum()),
     }
     return issues
