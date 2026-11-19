@@ -27,6 +27,7 @@ def test_prediction_features_exclude_outcome_and_post_outcome_fields() -> None:
     assert "Total_Waiting_Time" not in features.columns
     assert "Total_Length_of_Stay" not in features.columns
     assert "Disposition" not in features.columns
+    assert "Priority_Level" not in features.columns
     assert len(features) == len(target) == 200
     assert set(target.unique()) == {0, 1}
 
