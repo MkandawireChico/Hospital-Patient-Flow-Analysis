@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from patient_flow.config import DEFAULT_CONFIG_PATH, load_default_config
+import patient_flow.config as config
 
 
 AGE_GROUPS = ["0-4", "5-14", "15-24", "25-44", "45-64", "65+"]
@@ -343,9 +343,9 @@ def generate_case_study_data(
     Returns (clean_simulation, raw_dataset). Random seeds and all model parameters
     are loaded from config/default.yaml unless another YAML path is supplied.
     """
-    config_file = Path(config_path) if config_path else DEFAULT_CONFIG_PATH
+    config_file = Path(config_path) if config_path else config.DEFAULT_CONFIG_PATH
     if config_file.resolve() == DEFAULT_CONFIG_PATH.resolve():
-        config = load_default_config()
+        config = config.load_default_config()
     else:
         import yaml
 
