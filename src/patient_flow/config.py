@@ -87,7 +87,14 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
         _validate_probability_map(distribution, f"encounter_patterns.visit_type_probabilities.{name}")
     if set(simulation["department_codes"]) != set(departments):
         raise ValueError("department_codes must contain exactly the configured department names.")
-    arrival = simulation["arrival_patterns"]["emergency_hour_weights"]
+    arrival_patterns = simulation["arrival_patterns"]
+    for key, value in arrival_patterns["daytime_hour_weights"].items():
+        if float(value) <= 0:
+            raise ValueError(f"Daytime arrival weight {key} must be positive.")
+    minute_bounds = [int(value) for value in arrival_patterns["arrival_minute_bounds"]]
+    if len(minute_bounds) != 2 or not 0 <= minute_bounds[0] <= minute_bounds[1] <= 59:
+        raise ValueError("Arrival minute bounds must be ordered values between 0 and 59.")
+    arrival = arrival_patterns["emergency_hour_weights"]
     for key in ("default", "evening_peak", "early_morning"):
         if float(arrival[key]) <= 0:
             raise ValueError(f"Emergency arrival weight {key} must be positive.")
@@ -95,6 +102,15 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("Emergency arrival hour lists must contain hours from 0 to 23.")
     if int(issue["random_seed"]) < 0:
         raise ValueError("simulation.issue_injection.random_seed must be non-negative.")
+    if float(issue["impossible_timestamp_offset_minutes"]) <= 0:
+        raise ValueError("Impossible timestamp offset must be positive.")
+    for key in ("negative_wait_magnitude_minutes", "los_outlier_multiplier"):
+        values = [float(value) for value in issue[key]]
+        minimum = 0 if key == "negative_wait_magnitude_minutes" else 1
+        if len(values) != 2 or values[0] < minimum or values[1] < values[0]:
+            raise ValueError(f"issue_injection.{key} must contain two ordered valid values.")
+    if not issue["department_error_values"]:
+        raise ValueError("At least one department error replacement value is required.")
     for key, value in issue.items():
         if key.endswith("_rate") and not 0 <= float(value) <= 1:
             raise ValueError(f"simulation.issue_injection.{key} must be between 0 and 1.")
@@ -113,6 +129,9 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("Satisfaction wait penalty divisor must be greater than zero.")
     if float(satisfaction["admission_penalty"]) < 0:
         raise ValueError("Satisfaction admission penalty must be non-negative.")
+    score_bounds = [int(value) for value in satisfaction["score_bounds"]]
+    if len(score_bounds) != 2 or score_bounds[0] > score_bounds[1]:
+        raise ValueError("Satisfaction score bounds must be two ordered integers.")
     for key in ("admission_extra_stay_minutes",):
         values = [float(value) for value in behaviour[key]]
         if len(values) != 2 or values[0] < 0 or values[1] < values[0]:
