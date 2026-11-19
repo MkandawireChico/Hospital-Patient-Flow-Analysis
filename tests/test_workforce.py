@@ -60,7 +60,7 @@ def test_demand_coverage_joins_arrivals_to_rostered_staff() -> None:
         "Arrival_Time": ["2026-01-01 08:00:00", "2026-01-01 09:15:00"],
     })
     result = build_demand_coverage(encounters, roster)
-    assert result["Encounter_Arrivals"].sum() == 2
+    assert result["Demand_Events"].sum() == 2
     assert result.iloc[0]["Staff_On_Duty"] >= 1
     assert result.iloc[0]["Encounters_Per_Staff"] > 0
 
