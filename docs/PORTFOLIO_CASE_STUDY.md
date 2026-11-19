@@ -1,5 +1,12 @@
 # Portfolio Case Study: Hospital Patient Flow Analytics
 
+<p align="center">
+  <a href="https://hospital-operations-command-centre.streamlit.app/"><strong>▶ Explore the live application</strong></a>
+  &nbsp;•&nbsp;
+  <a href="https://github.com/MkandawireChico/Hospital-Patient-Flow-Analysis">View the source repository</a>
+</p>
+
+
 ## Executive summary
 
 This project demonstrates how a data scientist can turn operational event data into an auditable decision-support workflow. Using a structured Malawi-inspired district-hospital case study, it examines waiting-time patterns across registration, triage, consultation, laboratory, and pharmacy-related stages.
