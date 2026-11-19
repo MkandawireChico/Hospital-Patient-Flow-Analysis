@@ -14,7 +14,7 @@ The audit records the input row count, exclusions, retained cohort size, and mis
 - **Long-wait share:** percentage of non-missing valid waits strictly greater than 60 minutes.
 - **Stage P90:** 90th percentile of the recorded wait column for that stage.
 - **Stage contribution:** each stage's sum of observed wait minutes divided by the sum across all included stage columns. This is not a decomposition of total patient waiting time because stage observations may be missing, overlap, or represent different pathways.
-- **Department comparison:** the same total-wait statistics grouped by recorded department. These are descriptive comparisons and may reflect differences in patient mix, service pathways, and volume.
+- **Department comparison:** the same total-wait statistics grouped by recorded department. These are descriptive comparisons and may reflect differences in patient mix, service pathways, and volume. Python outputs retain `Unknown` as a separate data-quality category so unclassified records remain visible; it is not a clinical department and should not be ranked as one. The SQL department rankings exclude `Unknown`.
 
 The 60-minute threshold is a project convention for exploration. It is not a clinical triage rule or an externally validated service standard.
 
