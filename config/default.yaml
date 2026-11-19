@@ -116,6 +116,59 @@ simulation:
       servers: 4
       duration: [3, 8, 20]
 
+  department_codes:
+    Outpatient Department: OPD
+    Emergency: EMG
+    Maternal Health: MAT
+    Paediatrics: PED
+    Chronic Care: CHR
+    TB/HIV Clinic: TBH
+
+  demographics:
+    age_groups: ["0-4", "5-14", "15-24", "25-44", "45-64", "65+"]
+    default_age_distribution: [0.10, 0.15, 0.20, 0.30, 0.17, 0.08]
+    department_age_distributions:
+      Paediatrics:
+        groups: ["0-4", "5-14"]
+        probabilities: [0.60, 0.40]
+      Maternal Health:
+        groups: ["15-24", "25-44", "45-64"]
+        probabilities: [0.45, 0.50, 0.05]
+    default_sex_distribution: {Female: 0.52, Male: 0.48}
+    department_sex_distributions:
+      Maternal Health: {Female: 0.98, Male: 0.02}
+
+  encounter_patterns:
+    referral_probability: 0.10
+    department_referral_probabilities:
+      Emergency: 0.25
+      Chronic Care: 0.25
+      TB/HIV Clinic: 0.25
+    visit_type_probabilities:
+      Emergency: {Emergency: 0.75, New Visit: 0.15, Referral: 0.10}
+      Chronic Care: {Follow-up: 0.75, New Visit: 0.15, Referral: 0.10}
+      TB/HIV Clinic: {Follow-up: 0.75, New Visit: 0.15, Referral: 0.10}
+      default: {New Visit: 0.55, Follow-up: 0.35, Referral: 0.10}
+
+  behaviour:
+    non_routine_laboratory_probability_multiplier: 1.30
+    non_admitted_disposition_probabilities: {Discharged: 0.95, Referred Out: 0.05}
+    admission_extra_stay_minutes: [30, 120]
+    satisfaction:
+      baseline_score: 5
+      wait_penalty_divisor_minutes: 30
+      maximum_wait_penalty: 4
+      admission_penalty: 0.4
+      noise_standard_deviation: 0.6
+
+  arrival_patterns:
+    emergency_hour_weights:
+      default: 1.0
+      evening_peak: 2.5
+      early_morning: 0.5
+      evening_hours: [18, 19, 20, 21]
+      early_morning_hours: [0, 1, 2, 3, 4]
+
   issue_injection:
     missing_satisfaction_rate: 0.025
     missing_referral_rate: 0.025
@@ -124,3 +177,12 @@ simulation:
     impossible_timestamp_rate: 0.005
     negative_wait_rate: 0.005
     los_outlier_rate: 0.005
+    random_states:
+      missing_satisfaction: 10
+      missing_referral: 11
+      duplicates: 20
+      impossible_timestamps: 30
+      negative_waits: 40
+      los_outliers: 50
+      department_errors: 60
+    department_error_values: ["OPD ", "emergency", "Unknown", "PAEDS", "Outpatient department"]
