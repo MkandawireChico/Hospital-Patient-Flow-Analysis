@@ -10,6 +10,8 @@ The workforce module adds an operational planning layer to the patient-flow anal
 - Demand events per rostered staff member
 - Demand events per scheduled staff-hour
 - Daily workforce-unit demand intensity
+- Observed consultation, laboratory, pharmacy and registration-stage wait distributions mapped to the corresponding workforce units
+- P90 stage-wait comparisons by workforce unit
 - Downloadable directory, roster and demand-coverage tables
 
 Run `python -m patient_flow.workforce` from the repository root to regenerate `data/reference/staff_roster_synthetic.csv`. The Streamlit page at `dashboard/pages/2_Staff_Workforce.py` builds the roster over the encounter date range and aligns arrivals to DAY (07:00–14:59), EVENING (15:00–22:59) and NIGHT (23:00–06:59) shifts.
