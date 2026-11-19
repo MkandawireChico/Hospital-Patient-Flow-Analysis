@@ -21,6 +21,39 @@
 
 > **Explore the deployed application:** [hospital-operations-command-centre.streamlit.app](https://hospital-operations-command-centre.streamlit.app/). The dashboard brings patient-flow analytics, workforce coverage, role-based establishment and MWK budget planning into one interactive command centre.
 
+## Visual preview
+
+The charts below are reproducible analysis outputs from the repository. The live application adds interactive filters, patient-flow drill-downs, workforce and roster analytics, shift coverage, capacity sensitivity, and an MWK staffing budget planner.
+
+<p align="center">
+  <a href="https://hospital-operations-command-centre.streamlit.app/"><strong>Open the interactive command centre →</strong></a>
+</p>
+
+<table>
+  <tr>
+    <td width="50%">
+      <strong>Waiting-time distribution</strong><br>
+      <img src="visuals/charts/01_waiting_time_distribution.png" alt="Distribution of valid patient waiting times">
+    </td>
+    <td width="50%">
+      <strong>Department-level waiting times</strong><br>
+      <img src="visuals/charts/02_avg_waiting_time_by_department.png" alt="Waiting-time comparison by department">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>Arrival patterns</strong><br>
+      <img src="visuals/charts/06_arrivals_by_hour.png" alt="Patient arrivals by hour">
+    </td>
+    <td width="50%">
+      <strong>Patient volumes</strong><br>
+      <img src="visuals/charts/04_patient_volume_by_department.png" alt="Patient volume by department">
+    </td>
+  </tr>
+</table>
+
+*These are static analytical chart exports; use the live application for interactive exploration and the Workforce & Roster page.*
+
 ## At a glance
 
 | Area | What the project delivers |
