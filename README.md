@@ -24,6 +24,10 @@ Patients move through connected stages such as registration, triage, consultatio
 - **Strongest tested scenario:** Consultation wait reduction has p90 41.4 min versus baseline 48.2 min (6.8 min lower) and a 2.10-percentage-point lower long-wait share. Median wait remains 0.0 min across all scenarios, so the comparison is ranked on p90 and long-wait share rather than median alone.
 <!-- END GENERATED FINDINGS -->
 
+## Portfolio case study
+
+See [`docs/PORTFOLIO_CASE_STUDY.md`](docs/PORTFOLIO_CASE_STUDY.md) for the employer-facing project story, selected simulated findings, methods, technical skills, limitations, and a concise CV-ready project description.
+
 ## Project workflow
 
 - **Raw synthetic data:** start from the supplied simulated encounter file and its documented generation assumptions.
