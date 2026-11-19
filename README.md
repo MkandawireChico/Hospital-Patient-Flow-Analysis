@@ -1,4 +1,6 @@
-# Hospital Patient Flow Analysis
+# Hospital Operations Analytics & Workforce Planning
+
+*Patient flow • Workforce coverage • Bottleneck analysis • MWK resource planning*
 This project examines patient flow and workforce operations in a Malawi-inspired district-hospital case study. It asks: **Where do patients lose time in the hospital pathway, how does demand align with staffing, and which operational changes merit further investigation?** The repository provides a reproducible Python workflow for data quality, operational analysis, scenario comparison, workforce planning, predictive modelling and decision-ready visualisation.
 
 ## Why this project exists
