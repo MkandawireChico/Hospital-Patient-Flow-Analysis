@@ -15,6 +15,10 @@ This register contains 40 staff profiles created for the Chilungamo District Hos
 Do not add real names, phone numbers, addresses, payroll identifiers, or other personal data to this public portfolio dataset. Staff pay is intentionally not stored in this register. Staffing costs must be entered separately from locally verified payroll or HR sources in MWK, following [the costing guide](MWK_COSTING_GUIDE.md).
 
 
+## Demand and roster coverage output fields
+
+The following fields belong to the generated demand-coverage and roster-analysis tables, not to the 40-person staff directory itself.
+
 | Field | Definition |
 |---|---|
 | `Demand_Events` | Count of encounter arrivals or recorded service-stage events mapped to a workforce unit |
