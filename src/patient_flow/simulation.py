@@ -344,7 +344,7 @@ def generate_case_study_data(
     are loaded from config/default.yaml unless another YAML path is supplied.
     """
     config_file = Path(config_path) if config_path else config.DEFAULT_CONFIG_PATH
-    if config_file.resolve() == DEFAULT_CONFIG_PATH.resolve():
+    if config_file.resolve() == config.DEFAULT_CONFIG_PATH.resolve():
         config = config.load_default_config()
     else:
         import yaml
@@ -361,10 +361,10 @@ def generate_and_save_raw_dataset(
     output_path: str | Path | None = None,
 ) -> tuple[pd.DataFrame, Path]:
     """Generate the configured raw dataset, save it, and return the data and path."""
-    config_file = Path(config_path) if config_path else DEFAULT_CONFIG_PATH
+    config_file = Path(config_path) if config_path else config.DEFAULT_CONFIG_PATH
     config = (
-        load_default_config()
-        if config_file.resolve() == DEFAULT_CONFIG_PATH.resolve()
+        config.load_default_config()
+        if config_file.resolve() == config.DEFAULT_CONFIG_PATH.resolve()
         else None
     )
     if config is None:
