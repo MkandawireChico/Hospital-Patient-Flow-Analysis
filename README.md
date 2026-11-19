@@ -1,5 +1,5 @@
 # Hospital Patient Flow Analysis
-This project uses a **fully synthetic dataset** to examine patient flow in a fictional, Malawi-inspired district hospital. It asks: **Where do patients lose time in the hospital pathway, and which operational changes are most likely to improve flow?** The repository provides a reproducible Python workflow for cleaning, operational analysis, what-if scenario comparison, and generated decision outputs. No real patient or hospital data is used.
+This project examines patient flow and workforce operations in a Malawi-inspired district-hospital case study. It asks: **Where do patients lose time in the hospital pathway, how does demand align with staffing, and which operational changes merit further investigation?** The repository provides a reproducible Python workflow for data quality, operational analysis, scenario comparison, workforce planning, predictive modelling and decision-ready visualisation.
 
 ## Why this project exists
 
@@ -34,7 +34,7 @@ Additional technical documentation:
 
 ## Project workflow
 
-- **Raw synthetic data:** start from the supplied simulated encounter file and its documented generation assumptions.
+- **Encounter source:** start from the supplied case-study encounter file and its documented generation assumptions.
 - **Cleaning and quality flags:** standardise departments, detect timing issues, flag negative waits, and preserve quality indicators.
 - **Feature engineering:** derive arrival-hour, peak-period, long-wait, congestion, and month features.
 - **Baseline analysis:** calculate overall, stage, department, peak-period, and priority-level metrics.
@@ -46,7 +46,7 @@ Additional technical documentation:
 ```text
 config/                 Simulation configuration
 dashboard/              Power BI dashboard guide
-data/raw/               Synthetic source encounters
+data/raw/               Encounter source data
 data/processed/         Cleaned and feature-engineered encounters
 notebooks/              Exploratory analysis notebook
 reports/                Generated decision summary
@@ -65,7 +65,7 @@ requirements.txt        Runtime and development dependencies
 The encounter source is [`data/raw/hospital_patient_flow_synthetic.csv`](data/raw/hospital_patient_flow_synthetic.csv). The processed dataset is [`data/processed/hospital_patient_flow_clean.csv`](data/processed/hospital_patient_flow_clean.csv), which retains encounter rows and adds quality flags and analysis features.
 
 <!-- BEGIN GENERATED DATA COUNTS -->
-- Raw synthetic source: **35,418 rows**.
+- Raw encounter source: **35,418 rows**.
 - Processed dataset: **35,082 rows**.
 - Valid analysis cohort: **34,728 rows**.
 <!-- END GENERATED DATA COUNTS -->
@@ -82,7 +82,7 @@ The records include encounter and patient identifiers; visit dates and stage tim
 - **Baseline KPIs:** summarize mean, median, upper-tail wait, long-wait share, and length of stay overall and by relevant groups. Stage contribution is based on each stage's share of observed stage-wait minutes, not a decomposition of total wait.
 - **Scenarios:** compare baseline with a consultation-wait reduction for Routine patients and a consultation-wait reduction for Urgent/Emergency patients during the recorded Peak period. Each intervention changes the targeted consultation component and corresponding valid total wait; other components remain unchanged.
 
-Thresholds and flags are operational heuristics. Scenario reductions are assumed percentages implemented as what-if transformations. Neither establishes a real-world causal effect. All results depend on the simulation assumptions and the available synthetic fields.
+Thresholds and flags are operational heuristics. Scenario reductions are assumed percentages implemented as what-if transformations. Neither establishes a real-world causal effect. All results depend on the documented case-study assumptions and available fields.
 
 ## Interactive dashboard
 
