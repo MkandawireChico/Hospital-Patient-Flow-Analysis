@@ -16,6 +16,8 @@ from patient_flow.workforce import (  # noqa: E402
     ENCOUNTER_PATH,
     STAFF_PATH,
     build_demand_coverage,
+    build_role_coverage,
+    build_role_establishment,
     build_service_wait_summary,
     build_workforce_summary,
     ensure_roster,
@@ -38,6 +40,8 @@ roster = ensure_roster()
 summary = build_workforce_summary(roster)
 coverage = build_demand_coverage(encounters, roster)
 service_waits = build_service_wait_summary(encounters)
+role_coverage = build_role_coverage(roster)
+role_establishment = build_role_establishment(staff)
 
 st.sidebar.header("Workforce filters")
 departments = sorted(staff["Department"].dropna().unique().tolist())
@@ -46,6 +50,8 @@ staff_view = staff.loc[staff["Department"].isin(selected_departments)].copy()
 roster_view = roster.loc[roster["Department"].isin(selected_departments)].copy()
 summary_view = summary.loc[summary["Department"].isin(selected_departments)].copy()
 coverage_view = coverage.loc[coverage["Department"].isin(selected_departments)].copy()
+role_coverage_view = role_coverage.loc[role_coverage["Department"].isin(selected_departments)].copy()
+role_establishment_view = role_establishment.loc[role_establishment["Department"].isin(selected_departments)].copy()
 
 k1, k2, k3, k4 = st.columns(4)
 k1.metric("Registered staff", f"{len(staff_view):,}")
@@ -60,6 +66,64 @@ with left:
 with right:
     dept = staff_view.groupby("Department").size().reset_index(name="Staff")
     st.plotly_chart(px.bar(dept, x="Department", y="Staff", title="Staff establishment by department"), use_container_width=True)
+
+
+st.subheader("Role-specific establishment and skill mix")
+st.caption(
+    "Job titles are kept separate so role composition is visible without treating staff as interchangeable. "
+    "Scheduled headcount and hours describe the generated roster; they are not minimum staffing standards, "
+    "competency validation or a safe-staffing assessment."
+)
+if not role_establishment_view.empty:
+    role_left, role_right = st.columns(2)
+    with role_left:
+        establishment_plot = role_establishment_view.groupby(
+            ["Department", "Staff_Category"], as_index=False
+        )["Established_Staff"].sum()
+        st.plotly_chart(
+            px.bar(establishment_plot, x="Department", y="Established_Staff",
+                   color="Staff_Category", barmode="stack",
+                   title="Established headcount by department and staff category"),
+            use_container_width=True,
+        )
+    with role_right:
+        title_establishment = role_establishment_view.groupby(
+            ["Job_Title", "Staff_Category"], as_index=False
+        )["Established_Staff"].sum().sort_values("Established_Staff", ascending=False)
+        st.plotly_chart(
+            px.bar(title_establishment, x="Job_Title", y="Established_Staff",
+                   color="Staff_Category", title="Establishment by job title"),
+            use_container_width=True,
+        )
+if not role_coverage_view.empty:
+    role_hours = role_coverage_view.groupby(
+        ["Job_Title", "Shift", "Staff_Category"], as_index=False
+    ).agg(Scheduled_Hours=("Scheduled_Hours", "sum"))
+    st.plotly_chart(
+        px.bar(role_hours, x="Job_Title", y="Scheduled_Hours", color="Shift",
+               facet_col="Staff_Category", barmode="group",
+               title="Scheduled hours by job title and shift"),
+        use_container_width=True,
+    )
+    role_shift = role_coverage_view.groupby(
+        ["Department", "Job_Title", "Shift"], as_index=False
+    )["Staff_On_Duty"].mean()
+    role_shift["Department · role"] = role_shift["Department"] + " · " + role_shift["Job_Title"]
+    role_heat = role_shift.pivot(
+        index="Department · role", columns="Shift", values="Staff_On_Duty"
+    ).fillna(0)
+    st.plotly_chart(
+        px.imshow(role_heat, aspect="auto", color_continuous_scale="Teal",
+                  labels={"x": "Shift", "y": "Department · job title", "color": "Mean staff on duty"},
+                  title="Average rostered headcount by role and shift"),
+        use_container_width=True,
+    )
+    st.dataframe(role_coverage_view, use_container_width=True, hide_index=True)
+    st.download_button(
+        "Download role and shift coverage (CSV)",
+        role_coverage_view.to_csv(index=False).encode("utf-8"),
+        "workforce_role_shift_coverage.csv", "text/csv",
+    )
 
 st.subheader("Shift coverage")
 if not summary_view.empty:
