@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
+from patient_flow.capacity import build_capacity_sensitivity  # noqa: E402
 from patient_flow.workforce import (  # noqa: E402
     ENCOUNTER_PATH,
     STAFF_PATH,
@@ -102,6 +103,112 @@ if not coverage_view.empty:
                        "workforce_demand_coverage.csv", "text/csv")
 else:
     st.info("No demand events could be aligned to the selected workforce units and roster dates.")
+
+st.divider()
+st.subheader("Workforce capacity sensitivity")
+st.caption(
+    "Test how additional rostered hours change the observed demand-per-hour ratio for one workforce unit. "
+    "The scenario does not predict waiting-time reductions, throughput, clinical outcomes or safe staffing."
+)
+if not coverage_view.empty:
+    unit_options = sorted(coverage_view["Department"].dropna().unique().tolist())
+    selected_unit = st.selectbox("Workforce unit for sensitivity", unit_options)
+    scenario_left, scenario_right = st.columns(2)
+    with scenario_left:
+        additional_fte = st.number_input(
+            "Additional FTE across the analysis period",
+            min_value=0.0,
+            max_value=50.0,
+            value=0.0,
+            step=0.5,
+            key="capacity_additional_fte",
+        )
+        monthly_hours = st.number_input(
+            "Assumed hours per FTE per 30-day month",
+            min_value=1.0,
+            max_value=240.0,
+            value=160.0,
+            step=8.0,
+            key="capacity_monthly_hours",
+        )
+    with scenario_right:
+        monthly_cost = st.number_input(
+            "Fully loaded monthly cost per FTE (MWK)",
+            min_value=0.0,
+            max_value=1_000_000_000.0,
+            value=0.0,
+            step=50_000.0,
+            key="capacity_monthly_cost",
+        )
+        cost_source = st.text_input(
+            "Cost source / payroll reference",
+            key="capacity_cost_source",
+            placeholder="Approved payroll scale or finance reference",
+        )
+        effective_date = st.text_input(
+            "Cost effective date (YYYY-MM-DD)",
+            key="capacity_cost_date",
+            placeholder="YYYY-MM-DD",
+        )
+
+    period_days = int(coverage_view["Roster_Date"].nunique())
+    period_months = period_days / 30.0
+    sensitivity = build_capacity_sensitivity(
+        coverage_view,
+        workforce_unit=selected_unit,
+        additional_fte=additional_fte,
+        monthly_cost_per_fte_mwk=monthly_cost,
+        period_months=period_months,
+        monthly_hours_per_fte=monthly_hours,
+    )
+    metric_cols = st.columns(3)
+    baseline_rate = sensitivity["baseline_demand_events_per_scheduled_hour"]
+    scenario_rate = sensitivity["scenario_demand_events_per_scheduled_hour"]
+    metric_cols[0].metric(
+        "Current demand events / scheduled hour",
+        "Not available" if pd.isna(baseline_rate) else f"{baseline_rate:.3f}",
+    )
+    metric_cols[1].metric(
+        "Scenario demand events / scheduled hour",
+        "Not available" if pd.isna(scenario_rate) else f"{scenario_rate:.3f}",
+        delta=(
+            "Not available"
+            if pd.isna(baseline_rate) or pd.isna(scenario_rate)
+            else f"{scenario_rate - baseline_rate:+.3f}"
+        ),
+    )
+    metric_cols[2].metric(
+        "Incremental period budget",
+        f"MWK {sensitivity['incremental_period_budget_mwk']:,.0f}",
+    )
+    comparison = pd.DataFrame({
+        "Scenario": ["Current roster", "Added-hours sensitivity"],
+        "Demand events per scheduled hour": [baseline_rate, scenario_rate],
+    })
+    st.plotly_chart(
+        px.bar(
+            comparison,
+            x="Scenario",
+            y="Demand events per scheduled hour",
+            title=f"{selected_unit}: workload intensity sensitivity",
+        ),
+        use_container_width=True,
+    )
+    if additional_fte > 0 and monthly_cost > 0:
+        valid_date = pd.to_datetime(effective_date, errors="coerce")
+        if not cost_source.strip() or pd.isna(valid_date):
+            st.warning("The non-zero MWK cost is provisional until a source reference and valid effective date are recorded.")
+    st.caption(
+        f"Analysis window: {period_days} roster days, cost and added hours prorated over {period_months:.2f} 30-day months. "
+        f"Added hours assume {monthly_hours:.0f} hours per FTE-month. This is an explicit sensitivity assumption, "
+        "not a prediction that the same hours can be safely scheduled in every shift."
+    )
+    st.download_button(
+        "Download capacity sensitivity (CSV)",
+        data=pd.DataFrame([sensitivity]).to_csv(index=False).encode("utf-8"),
+        file_name="workforce_capacity_sensitivity.csv",
+        mime="text/csv",
+    )
 
 st.subheader("Staff directory")
 st.dataframe(staff_view, use_container_width=True, hide_index=True)
