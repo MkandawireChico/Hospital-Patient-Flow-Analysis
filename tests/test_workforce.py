@@ -63,3 +63,44 @@ def test_demand_coverage_joins_arrivals_to_rostered_staff() -> None:
     assert result["Encounter_Arrivals"].sum() == 2
     assert result.iloc[0]["Staff_On_Duty"] >= 1
     assert result.iloc[0]["Encounters_Per_Staff"] > 0
+
+
+def test_service_stage_demand_maps_to_laboratory_pharmacy_and_administration() -> None:
+    staff = pd.DataFrame([
+        {"Staff_ID": "L1", "Staff_Name": "Lab Staff", "Job_Title": "Technologist", "Department": "Laboratory"},
+        {"Staff_ID": "P1", "Staff_Name": "Pharmacy Staff", "Job_Title": "Pharmacist", "Department": "Pharmacy"},
+        {"Staff_ID": "A1", "Staff_Name": "Admin Staff", "Job_Title": "Clerk", "Department": "Administration"},
+    ])
+    roster = generate_monthly_roster(staff, start_date="2026-01-01", days=1)
+    encounters = pd.DataFrame({
+        "Department": ["Outpatient Department", "Emergency", "Outpatient Department"],
+        "Arrival_Time": ["2026-01-01 08:00:00", "2026-01-01 16:00:00", "2026-01-01 23:30:00"],
+        "Laboratory_Wait_Time": [25.0, None, 0.0],
+        "Pharmacy_Wait_Time": [None, 18.0, 0.0],
+        "Wait_For_Registration_Min": [5.0, 6.0, 7.0],
+    })
+    result = build_demand_coverage(encounters, roster)
+    lab = result.loc[result["Department"].eq("Laboratory")]
+    pharmacy = result.loc[result["Department"].eq("Pharmacy")]
+    admin = result.loc[result["Department"].eq("Administration")]
+    assert lab["Demand_Events"].sum() == 2
+    assert pharmacy["Demand_Events"].sum() == 2
+    assert admin["Demand_Events"].sum() == 3
+    assert set(lab["Demand_Basis"]) == {"Recorded laboratory-stage events"}
+    assert set(pharmacy["Demand_Basis"]) == {"Recorded pharmacy-stage events"}
+    assert set(admin["Demand_Basis"]) == {"Recorded registration-stage events"}
+    assert set(result["Demand_Shift_Basis"]) == {
+        "Arrival shift; service-stage shift is not observed"
+    }
+
+
+def test_missing_service_stage_columns_do_not_break_workforce_coverage() -> None:
+    staff = sample_staff()
+    roster = generate_monthly_roster(staff, start_date="2026-01-01", days=1)
+    encounters = pd.DataFrame({
+        "Department": ["Emergency"],
+        "Arrival_Time": ["2026-01-01 08:00:00"],
+    })
+    result = build_demand_coverage(encounters, roster)
+    assert result["Demand_Events"].sum() == 1
+    assert result["Department"].tolist() == ["Emergency"]
