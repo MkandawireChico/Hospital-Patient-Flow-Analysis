@@ -28,12 +28,17 @@ patient_flow.analysis          Streamlit dashboard
   - stage/department             - MWK budget planner
   - hourly/priority summaries    - bootstrap intervals
       |
-      v
-patient_flow.scenarios
-  - explicit what-if wait transformations
-      |
-      v
-results/*.csv and reports/*.md
+      +------------------------------+
+      |                              |
+      v                              v
+patient_flow.scenarios        patient_flow.prediction
+  - explicit what-if             - pre-outcome features
+    wait transformations         - logistic regression
+      |                          - hold-out metrics
+      +--------------+---------------+
+                     |
+                     v
+           results/*.csv and reports/*.md
 ```
 
 ## Main components
