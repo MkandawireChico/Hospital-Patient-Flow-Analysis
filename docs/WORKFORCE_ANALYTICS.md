@@ -7,8 +7,8 @@ The workforce module adds an operational planning layer to the patient-flow anal
 - Workforce establishment by department and staff category
 - Daily scheduled headcount by shift
 - Clinical encounter and service-stage demand by workforce unit and shift
-- Encounters per rostered staff member
-- Encounters per scheduled staff-hour
+- Demand events per rostered staff member
+- Demand events per scheduled staff-hour
 - Daily workforce-unit demand intensity
 - Downloadable directory, roster and demand-coverage tables
 
