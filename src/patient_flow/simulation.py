@@ -118,7 +118,7 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
         day_records: list[dict[str, Any]] = []
 
         for department, dept in departments.items():
-            weekend_factor = float(settings["weekend_multiplier"]) if day_name in ("Saturday", "Sunday") else 1.0
+            weekend_factor = float(dept["weekend_multiplier"]) if day_name in ("Saturday", "Sunday") else 1.0
             n_patients = int(np.random.poisson(float(dept["daily_mean"]) * weekend_factor))
             if not n_patients:
                 continue
