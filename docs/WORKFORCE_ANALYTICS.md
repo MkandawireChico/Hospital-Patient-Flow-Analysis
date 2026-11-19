@@ -11,7 +11,7 @@ The workforce module adds an operational planning layer to the patient-flow anal
 - Demand events per scheduled staff-hour
 - Daily workforce-unit demand intensity
 - Observed consultation, laboratory, pharmacy and registration-stage wait distributions mapped to the corresponding workforce units
-- P90 stage-wait comparisons by workforce unit
+- P90 stage-wait comparisons by workforce unit and patient arrival shift
 - Downloadable directory, roster and demand-coverage tables
 
 Run `python -m patient_flow.workforce` from the repository root to regenerate `data/reference/staff_roster_synthetic.csv`. The Streamlit page at `dashboard/pages/2_Staff_Workforce.py` builds the roster over the encounter date range and aligns arrivals to DAY (07:00–14:59), EVENING (15:00–22:59) and NIGHT (23:00–06:59) shifts.
@@ -42,4 +42,4 @@ The resulting events-per-rostered-person and events-per-scheduled-hour measures 
 
 The Workforce & Roster page includes a unit-level sensitivity that adds a user-selected number of FTE-equivalents over the selected roster period. Added hours use an explicit configurable assumption of hours per FTE per 30-day month; the incremental cost uses a user-entered fully loaded monthly cost in MWK and is prorated over the roster window. A non-zero cost is flagged as provisional until its source and effective date are supplied.
 
-The comparison reports current and scenario demand events per scheduled hour for the selected workforce unit. It is not a queueing model and does not predict waiting-time reductions, throughput, clinical outcomes, or safe staffing. It assumes added hours can be allocated within the selected unit; it does not determine role mix, shift placement, leave cover, or legal/contractual compliance.
+The comparison reports current and scenario demand events per scheduled hour for the selected workforce unit and selected shift. The observed stage-wait view also separates patient arrival shifts, allowing analysts to compare shift-level patterns without assuming that arrival time equals actual service time. It is not a queueing model and does not predict waiting-time reductions, throughput, clinical outcomes, or safe staffing. It assumes added hours can be allocated within the selected unit; it does not determine role mix, shift placement, leave cover, or legal/contractual compliance.
