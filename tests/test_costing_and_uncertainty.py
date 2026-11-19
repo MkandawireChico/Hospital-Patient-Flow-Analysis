@@ -55,3 +55,25 @@ def test_bootstrap_intervals_are_reproducible_and_ordered() -> None:
 def test_bootstrap_requires_enough_valid_observations() -> None:
     with pytest.raises(ValueError):
         bootstrap_wait_confidence_intervals(pd.Series([10, None]))
+
+
+def test_staffing_budget_flags_missing_or_invalid_cost_metadata() -> None:
+    result = calculate_staffing_budget(
+        {
+            "Nurse": {
+                "additional_staff": 1,
+                "monthly_cost_mwk": 200_000,
+                "cost_source": "",
+                "effective_date": "not-a-date",
+            }
+        },
+        months=3,
+    )
+
+    assert not bool(result.loc[0, "assumption_complete"])
+    assert result.loc[0, "period_total_mwk"] == 600_000
+
+
+def test_staffing_budget_rejects_zero_month_period() -> None:
+    with pytest.raises(ValueError):
+        calculate_staffing_budget({}, months=0)
