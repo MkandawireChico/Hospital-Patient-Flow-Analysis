@@ -107,6 +107,8 @@ Alternatively, use `make dashboard` where Make is available. The dashboard reads
 
 ### Budget planning in Malawi Kwacha (MWK)
 
+For the costing method and input governance, see [the MWK costing guide](docs/MWK_COSTING_GUIDE.md) and [the editable assumptions template](config/mwk_staffing_cost_template.csv).
+
 The dashboard includes a staffing budget planner denominated in **MWK**. Enter locally verified monthly fully loaded staff costs and additional FTE assumptions to calculate monthly and multi-month staffing budgets. No USD conversion or unverified salary estimates are built in. The dashboard also offers optional 95% bootstrap confidence intervals for median wait, P90 wait, and long-wait share.
 
 ## Power BI
