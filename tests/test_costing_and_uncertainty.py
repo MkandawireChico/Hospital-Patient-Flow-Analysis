@@ -22,6 +22,7 @@ def test_staffing_budget_uses_mwk_and_period_length() -> None:
     assert result.loc[0, "period_total_mwk"] == 4_200_000
     assert result.loc[0, "cost_source"] == "Approved payroll scale"
     assert result.loc[0, "effective_date"] == "2026-11-01"
+    assert bool(result.loc[0, "assumption_complete"])
 
 
 def test_staffing_budget_rejects_negative_costs() -> None:
