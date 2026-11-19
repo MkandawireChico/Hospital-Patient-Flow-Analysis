@@ -14,7 +14,7 @@ def boolean_flag_column(df: pd.DataFrame, column: str) -> pd.Series:
         values.astype("string")
         .str.strip()
         .str.casefold()
-        .isin({"true", "1", "yes", "y"})
+        .isin({"true", "1", "1.0", "yes", "y"})
         .fillna(False)
         .astype(bool)
     )
