@@ -324,17 +324,31 @@ def main() -> None:
                 values="_wait",
                 aggfunc="median",
             )
-            chart = px.imshow(
-                heat_summary,
-                aspect="auto",
-                text_auto=".1f",
-                color_continuous_scale="YlOrRd",
+            volume_summary = heat_data.pivot_table(
+                index="Department",
+                columns="_hour",
+                values="_wait",
+                aggfunc="size",
+            ).reindex_like(heat_summary)
+            chart = go.Figure(
+                data=go.Heatmap(
+                    z=heat_summary.to_numpy(),
+                    x=heat_summary.columns,
+                    y=heat_summary.index,
+                    customdata=volume_summary.to_numpy(),
+                    colorscale="YlOrRd",
+                    colorbar=dict(title="Median wait (min)"),
+                    hovertemplate=(
+                        "Department: %{y}<br>Arrival hour: %{x}:00<br>"
+                        "Median wait: %{z:.1f} min<br>Encounters: %{customdata}<extra></extra>"
+                    ),
+                )
+            )
+            chart.update_layout(
                 title="Median valid wait (minutes) by department and arrival hour",
-                labels={
-                    "x": "Arrival hour",
-                    "y": "Department",
-                    "color": "Median wait (minutes)",
-                },
+                xaxis_title="Arrival hour",
+                yaxis_title="Department",
+                template=CHART_TEMPLATE,
             )
             st.plotly_chart(chart, use_container_width=True)
             st.caption(
