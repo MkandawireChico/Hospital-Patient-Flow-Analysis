@@ -34,3 +34,10 @@ The workforce analysis separates three kinds of demand rather than assuming ever
 Service-stage events are grouped by the patient's arrival date and arrival shift because the dataset does not consistently provide service-start timestamps for laboratory and pharmacy. This is a timing proxy, not proof that the event was handled by the staff rostered on that shift. The dashboard labels this explicitly. A zero wait is counted as a recorded service event; a missing stage value is not.
 
 The resulting events-per-rostered-person and events-per-scheduled-hour measures are descriptive workload indicators. They do not estimate throughput capacity, staff productivity, clinical acuity, minimum safe staffing, or causal effects of adding staff. Facilities/support roles are not assigned patient-service demand in this version.
+
+
+## Capacity sensitivity and MWK budget
+
+The Workforce & Roster page includes a unit-level sensitivity that adds a user-selected number of FTE-equivalents over the selected roster period. Added hours use an explicit configurable assumption of hours per FTE per 30-day month; the incremental cost uses a user-entered fully loaded monthly cost in MWK and is prorated over the roster window. A non-zero cost is flagged as provisional until its source and effective date are supplied.
+
+The comparison reports current and scenario demand events per scheduled hour for the selected workforce unit. It is not a queueing model and does not predict waiting-time reductions, throughput, clinical outcomes, or safe staffing. It assumes added hours can be allocated within the selected unit; it does not determine role mix, shift placement, leave cover, or legal/contractual compliance.
