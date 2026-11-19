@@ -42,7 +42,9 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
             value = float(department[key])
             if value < 0 or (key != "daily_mean" and value < 1):
                 raise ValueError(f"Department {name}: {key} has an invalid value.")
-        for key in ("weekend_multiplier", "laboratory_probability", "pharmacy_probability"):
+        if float(department["weekend_multiplier"]) < 0:
+            raise ValueError(f"Department {name}: weekend_multiplier must be non-negative.")
+        for key in ("laboratory_probability", "pharmacy_probability"):
             if not 0 <= float(department[key]) <= 1:
                 raise ValueError(f"Department {name}: {key} must be between 0 and 1.")
         for key in ("registration_duration", "triage_duration", "consultation_duration"):
@@ -50,7 +52,8 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
             if len(duration) != 3 or not 0 < duration[0] <= duration[1] <= duration[2]:
                 raise ValueError(f"Department {name}: {key} must be three positive, ordered triangular values.")
         _validate_probability_map(department["priority_distribution"], f"{name}.priority_distribution")
-        _validate_probability_map(department["admission_probability"], f"{name}.admission_probability")
+        if any(not 0 <= float(value) <= 1 for value in department["admission_probability"].values()):
+            raise ValueError(f"{name}.admission_probability values must be between 0 and 1.")
         if set(department["admission_probability"]) != set(department["priority_distribution"]):
             raise ValueError(f"Department {name}: admission probabilities must cover every priority.")
 
