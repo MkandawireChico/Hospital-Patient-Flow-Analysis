@@ -21,6 +21,7 @@ from patient_flow.analysis import (  # noqa: E402
     summarise_waits_by_stage,
 )
 from patient_flow.costing import calculate_staffing_budget, format_mwk  # noqa: E402
+from patient_flow.flags import boolean_flag_column  # noqa: E402
 from patient_flow.scenarios import (  # noqa: E402
     build_scenario_comparison,
     build_scenario_department_effects,
@@ -49,16 +50,8 @@ def load_data(path: str, modified_time: float) -> pd.DataFrame:
 
 
 def as_bool(series: pd.Series) -> pd.Series:
-    """Parse real booleans and common CSV string representations safely."""
-    if pd.api.types.is_bool_dtype(series):
-        return series.fillna(False)
-    return (
-        series.astype("string")
-        .str.strip()
-        .str.casefold()
-        .isin({"true", "1", "yes", "y"})
-        .fillna(False)
-    )
+    """Compatibility wrapper around the shared CSV-safe boolean parser."""
+    return boolean_flag_column(pd.DataFrame({"flag": series}), "flag")
 
 
 def minutes(value: float) -> str:
