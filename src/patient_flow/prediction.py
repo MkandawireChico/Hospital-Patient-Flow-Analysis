@@ -25,7 +25,6 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 DEFAULT_FEATURES = [
     "Department",
-    "Priority_Level",
     "Visit_Type",
     "Arrival_Hour",
     "Arrival_Day_Of_Week",
