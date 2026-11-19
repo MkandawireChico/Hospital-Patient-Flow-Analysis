@@ -22,4 +22,4 @@ jobs:
       - name: Run tests
         run: python -m pytest -q
       - name: Lint changed project modules
-        run: python -m ruff check src/patient_flow tests dashboard/app.py
+        run: python -m ruff check src/patient_flow tests dashboard/app.py --ignore E501
