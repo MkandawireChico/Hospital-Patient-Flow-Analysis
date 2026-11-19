@@ -62,7 +62,7 @@ def test_demand_coverage_joins_arrivals_to_rostered_staff() -> None:
     result = build_demand_coverage(encounters, roster)
     assert result["Demand_Events"].sum() == 2
     assert result.iloc[0]["Staff_On_Duty"] >= 1
-    assert result.iloc[0]["Encounters_Per_Staff"] > 0
+    assert result.iloc[0]["Demand_Events_Per_Staff"] > 0
 
 
 def test_service_stage_demand_maps_to_laboratory_pharmacy_and_administration() -> None:
