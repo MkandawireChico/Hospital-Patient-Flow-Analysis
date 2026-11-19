@@ -4,7 +4,7 @@
 
 This project demonstrates how a data scientist can turn operational event data into an auditable decision-support workflow. Using a fully synthetic dataset for a fictional Malawi-inspired district hospital, it examines waiting-time patterns across registration, triage, consultation, laboratory, and pharmacy-related stages.
 
-The work combines Python data preparation, data-quality controls, descriptive statistics, scenario analysis, interactive visualisation, and reproducible reporting. The results are simulated examples for a portfolio; they are not evidence about any real hospital.
+The work combines Python data preparation, data-quality controls, descriptive statistics, leakage-conscious predictive modelling, scenario analysis, interactive visualisation, MWK budget planning, and reproducible reporting. The results are simulated examples for a portfolio; they are not evidence about any real hospital.
 
 ## Business question
 
@@ -116,6 +116,7 @@ The dashboard can estimate 95% percentile-bootstrap confidence intervals for the
 - Distribution-aware descriptive statistics.
 - Scenario-based operational analysis.
 - Interactive charts and dashboard development with Plotly and Streamlit.
+- scikit-learn preprocessing pipelines, logistic regression, and held-out classification evaluation.
 - Automated tests and linting.
 - Reproducible outputs and decision-focused documentation.
 - Responsible communication of simulated data and analytical limitations.
