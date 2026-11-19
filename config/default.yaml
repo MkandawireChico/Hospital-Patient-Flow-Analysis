@@ -67,6 +67,8 @@ simulation:
 
   weekend_multiplier: 0.8
   issue_injection:
+    missing_satisfaction_rate: 0.025
+    missing_referral_rate: 0.025
     duplicate_rate: 0.01
     department_error_rate: 0.003
     impossible_timestamp_rate: 0.005
