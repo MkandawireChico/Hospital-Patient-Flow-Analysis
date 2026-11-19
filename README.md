@@ -135,7 +135,7 @@ Additional technical documentation:
 
 ## Project workflow
 
-- **Encounter source:** start from the supplied case-study encounter file and its documented generation assumptions.
+- **Encounter source:** generate reproducible encounters from `config/default.yaml` through the shared `patient_flow.simulation` module; the generated raw CSV is committed for convenient reuse.
 - **Cleaning and quality flags:** standardise departments, detect timing issues, flag negative waits, and preserve quality indicators.
 - **Feature engineering:** derive arrival-hour, peak-period, long-wait, congestion, and month features.
 - **Baseline analysis:** calculate overall, stage, department, peak-period, and priority-level metrics.
@@ -146,7 +146,7 @@ Additional technical documentation:
 
 ```text
 .github/workflows/      Automated test and lint checks
-config/                 Reference simulation settings and MWK cost template
+config/                 Runtime simulation configuration and MWK cost template
 dashboard/              Streamlit patient-flow app, workforce page and Power BI guide
 data/raw/               Committed generated encounter source
 data/processed/         Cleaned and feature-engineered encounters
@@ -255,7 +255,7 @@ $env:PYTHONPATH = "src"
 python -m patient_flow.cli run
 ```
 
-The `run` command rebuilds the processed dataset, result CSVs, decision summary, and generated README findings. To regenerate analysis outputs from the existing processed dataset, run:
+The `run` command regenerates the raw encounter CSV from `config/default.yaml`, rebuilds the processed dataset, result CSVs, decision summary, and generated README findings. To skip simulation and rebuild from the committed raw CSV, use `python -m patient_flow.cli run --use-existing-raw`. To regenerate analysis outputs from the existing processed dataset, run:
 
 ```powershell
 python -m patient_flow.cli analyse
@@ -268,7 +268,7 @@ python -m pytest -q
 python -m ruff check .
 ```
 
-The exploratory notebook currently generates the committed raw encounter CSV. `config/default.yaml` is a reference settings file and is not yet consumed by that generator or the CLI; consolidating these into one configuration-driven generator is a documented next step. The CLI is implemented in `src/patient_flow/cli.py`; `make run`, `make analyse`, `make test`, and `make lint` provide the corresponding Make targets where Make is available.
+The exploratory notebook and CLI both call `src/patient_flow/simulation.py`, which reads the complete runtime settings from `config/default.yaml`. This keeps the random seed, department arrival patterns, staffing, service-time distributions, shared-service capacity, and injected data-quality rates in one maintainable configuration. The CLI is implemented in `src/patient_flow/cli.py`; `make run`, `make analyse`, `make test`, and `make lint` provide the corresponding Make targets where Make is available.
 
 ## Author
 
