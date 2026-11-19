@@ -12,6 +12,7 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
 from patient_flow.capacity import build_capacity_sensitivity  # noqa: E402
+from patient_flow.costing import calculate_staffing_budget  # noqa: E402
 from patient_flow.workforce import (  # noqa: E402
     ENCOUNTER_PATH,
     STAFF_PATH,
@@ -321,6 +322,97 @@ if not coverage_view.empty:
         file_name="workforce_capacity_sensitivity.csv",
         mime="text/csv",
     )
+
+st.divider()
+st.subheader("Role-based establishment and MWK budget planner")
+st.caption(
+    "Build a department-filtered staffing proposal by actual job title. Enter additional FTE "
+    "and locally verified fully loaded monthly cost per FTE. Blank or zero cost inputs are not "
+    "salary estimates; they simply produce a zero-valued budget until completed."
+)
+if not role_establishment_view.empty:
+    budget_roles = (
+        role_establishment_view[["Department", "Staff_Category", "Job_Title"]]
+        .drop_duplicates()
+        .sort_values(["Department", "Staff_Category", "Job_Title"])
+        .reset_index(drop=True)
+    )
+    budget_roles["Role"] = (
+        budget_roles["Department"] + " · " + budget_roles["Staff_Category"]
+        + " · " + budget_roles["Job_Title"]
+    )
+    budget_input = budget_roles[["Role", "Department", "Staff_Category", "Job_Title"]].copy()
+    budget_input["Additional_FTE"] = 0.0
+    budget_input["Monthly_Fully_Loaded_Cost_MWK"] = 0.0
+    budget_input["Cost_Source"] = ""
+    budget_input["Effective_Date"] = ""
+    budget_period = st.number_input(
+        "Budget period (months)", min_value=1, max_value=60, value=12, step=1,
+        key="role_budget_period_months",
+    )
+    edited_budget = st.data_editor(
+        budget_input,
+        use_container_width=True,
+        hide_index=True,
+        key="role_budget_editor",
+        disabled=["Role", "Department", "Staff_Category", "Job_Title"],
+        column_config={
+            "Additional_FTE": st.column_config.NumberColumn(
+                "Additional FTE", min_value=0.0, max_value=100.0, step=0.5,
+                help="Proposed additional full-time-equivalent staff for this job title.",
+            ),
+            "Monthly_Fully_Loaded_Cost_MWK": st.column_config.NumberColumn(
+                "Monthly cost per FTE (MWK)", min_value=0.0, step=50000.0,
+                format="%.0f",
+                help="Enter an approved local monthly fully loaded cost; no default salary is supplied.",
+            ),
+            "Cost_Source": st.column_config.TextColumn(
+                "Payroll / finance source", help="Record a verifiable scale, circular or finance reference."
+            ),
+            "Effective_Date": st.column_config.TextColumn(
+                "Effective date (YYYY-MM-DD)"
+            ),
+        },
+    )
+    role_budget = {}
+    for _, row in edited_budget.iterrows():
+        role_budget[str(row["Role"])] = {
+            "additional_staff": float(row["Additional_FTE"]),
+            "monthly_cost_mwk": float(row["Monthly_Fully_Loaded_Cost_MWK"]),
+            "cost_source": str(row["Cost_Source"]),
+            "effective_date": str(row["Effective_Date"]),
+        }
+    budget_result = calculate_staffing_budget(role_budget, months=int(budget_period))
+    if not budget_result.empty:
+        budget_result = budget_result.merge(
+            budget_roles[["Role", "Department", "Staff_Category", "Job_Title"]],
+            left_on="role", right_on="Role", how="left", validate="one_to_one",
+        ).drop(columns=["Role"])
+        monthly_total = float(budget_result["monthly_total_mwk"].sum())
+        period_total = float(budget_result["period_total_mwk"].sum())
+        budget_metrics = st.columns(3)
+        budget_metrics[0].metric("Proposed additional FTE", f"{budget_result['additional_staff'].sum():,.1f}")
+        budget_metrics[1].metric("Incremental monthly budget", f"MWK {monthly_total:,.0f}")
+        budget_metrics[2].metric(f"{int(budget_period)}-month budget", f"MWK {period_total:,.0f}")
+        incomplete = budget_result.loc[
+            budget_result["additional_staff"].gt(0)
+            & budget_result["monthly_cost_per_person_mwk"].gt(0)
+            & ~budget_result["assumption_complete"]
+        ]
+        if not incomplete.empty:
+            st.warning(
+                f"{len(incomplete)} role cost assumption(s) need both a source reference "
+                "and a valid effective date before they can be treated as documented inputs."
+            )
+        st.dataframe(
+            budget_result.sort_values("period_total_mwk", ascending=False),
+            use_container_width=True, hide_index=True,
+        )
+        st.download_button(
+            "Download role-based MWK budget (CSV)",
+            budget_result.to_csv(index=False).encode("utf-8"),
+            "role_based_staffing_budget_mwk.csv", "text/csv",
+        )
 
 st.subheader("Staff directory")
 st.dataframe(staff_view, use_container_width=True, hide_index=True)
