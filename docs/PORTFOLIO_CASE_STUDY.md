@@ -2,7 +2,7 @@
 
 ## Executive summary
 
-This project demonstrates how a data scientist can turn operational event data into an auditable decision-support workflow. Using a fully synthetic dataset for a fictional Malawi-inspired district hospital, it examines waiting-time patterns across registration, triage, consultation, laboratory, and pharmacy-related stages.
+This project demonstrates how a data scientist can turn operational event data into an auditable decision-support workflow. Using a structured Malawi-inspired district-hospital case study, it examines waiting-time patterns across registration, triage, consultation, laboratory, and pharmacy-related stages.
 
 The work combines Python data preparation, data-quality controls, descriptive statistics, leakage-conscious predictive modelling, scenario analysis, interactive visualisation, MWK budget planning, and reproducible reporting. The results are simulated examples for a portfolio; they are not evidence about any real hospital.
 
@@ -18,16 +18,14 @@ The project deliberately separates three questions:
 
 ## Data and governance
 
-- The source data is synthetic and generated for this project.
-- The hospital and its setting are fictional.
-- No real patient records, names, or clinical decisions are represented.
+The case study uses generated encounter records and an invented workforce register to demonstrate a complete analytics workflow. The hospital is a constructed case-study setting; no identifiable patient or employee records are included. The analysis is designed to demonstrate methods and operational reasoning, not to report the performance of a named facility.
 - Missing stage waits are retained as missing when a service was not used or no value was recorded; they are not automatically treated as zero.
 - Records with invalid timestamp or negative-wait evidence are excluded from wait KPIs, while the audit records the excluded count.
 - The 60-minute long-wait threshold is an explicit analytical convention, not a clinical standard.
 
 The current repository snapshot contains 35,418 raw synthetic records, 35,082 processed records, and 34,728 records in the valid analysis cohort. The generated report should be rerun after any data or pipeline changes.
 
-## Selected simulated findings
+## Selected case-study findings
 
 | Measure | Result | Interpretation |
 |---|---:|---|
@@ -50,7 +48,7 @@ The current scenario module compares a baseline with two transparent what-if tra
 
 In the current simulated output, the Routine consultation-reduction scenario lowers P90 total valid wait from 48.2 to 41.4 minutes and reduces the share above 60 minutes by 2.10 percentage points.
 
-These calculations assume the targeted component can be reduced by the stated amount and that other components remain unchanged. They are not forecasts, causal estimates, or recommendations to change real hospital operations. A real intervention would require operational validation, resource constraints, safety review, and evaluation using appropriate pre/post or experimental designs.
+These calculations assume the targeted component can be reduced by the stated amount and that other components remain unchanged. They are exploratory comparisons, not forecasts, causal estimates, or recommendations to change hospital operations. A real intervention would require operational validation, resource constraints, safety review, and evaluation using appropriate pre/post or experimental designs.
 
 ## Analytical workflow
 
@@ -90,7 +88,7 @@ The dashboard includes an optional logistic-regression baseline for classifying 
 
 Predictors are limited to encounter descriptors available at or near registration and arrival-time features (department, visit type, arrival hour, day of week, and month where available). Triage priority is excluded because it may be assigned after the waiting-time clock has started. Wait components, total waiting time, length of stay, and disposition are deliberately excluded from the feature matrix to reduce target leakage. Coefficients are associations in the fitted model, not causal effects.
 
-This is an exploratory baseline on synthetic data. It has not been externally validated, calibrated for a real facility, or assessed for fairness or clinical utility. It must not be used to prioritise real patients or make clinical decisions.
+This is an exploratory baseline on the case-study dataset. It has not been externally validated, calibrated for a real facility, or assessed for fairness or clinical utility. It must not be used to prioritise real patients or make clinical decisions.
 
 ## Local budget planning in Malawi Kwacha (MWK)
 
@@ -106,7 +104,7 @@ The dashboard does not assign a monetary value to patient waiting time. Monetisi
 
 ## Statistical uncertainty
 
-The dashboard can estimate 95% percentile-bootstrap confidence intervals for the median wait, P90 wait, and share of waits above 60 minutes. The calculation uses 500 bootstrap replicates and a reproducible sample of up to 5,000 valid waits for responsiveness. These intervals describe sampling variation in the selected synthetic cohort only. They do not represent uncertainty in the simulation design, omitted variables, or the effect of a real-world intervention.
+The dashboard can estimate 95% percentile-bootstrap confidence intervals for the median wait, P90 wait, and share of waits above 60 minutes. The calculation uses 500 bootstrap replicates and a reproducible sample of up to 5,000 valid waits for responsiveness. These intervals describe sampling variation in the selected analysis cohort only. They do not represent uncertainty in the simulation design, omitted variables, or the effect of a real-world intervention.
 
 ## Technical skills demonstrated
 
