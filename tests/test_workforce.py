@@ -3,6 +3,8 @@ import pandas as pd
 from patient_flow.workforce import (
     assign_arrival_shift,
     build_demand_coverage,
+    build_role_coverage,
+    build_role_establishment,
     build_workforce_summary,
     generate_monthly_roster,
 )
@@ -183,3 +185,33 @@ def test_service_wait_summary_maps_stage_waits_to_workforce_units() -> None:
     assert admin["Service_Events"] == 1
     assert opd["Service_Events"] == 1
     assert opd["Shift"] == "DAY"
+
+ 
+def test_role_coverage_preserves_job_titles_categories_and_shift_hours() -> None:
+    staff = pd.DataFrame([
+        {"Staff_ID": "N1", "Staff_Name": "Nurse One", "Job_Title": "Registered Nurse",
+         "Department": "Emergency", "Staff_Category": "Nursing"},
+        {"Staff_ID": "M1", "Staff_Name": "Medical One", "Job_Title": "Medical Officer",
+         "Department": "Emergency", "Staff_Category": "Clinical"},
+    ])
+    roster = generate_monthly_roster(staff, start_date="2026-01-01", days=1)
+    result = build_role_coverage(roster)
+    assert set(result["Job_Title"]) == {"Registered Nurse", "Medical Officer"}
+    assert set(result["Staff_Category"]) == {"Nursing", "Clinical"}
+    assert (result["Scheduled_Hours"] == result["Staff_On_Duty"] * 8).all()
+    assert "OFF" not in set(result["Shift"])
+
+
+def test_role_establishment_counts_unique_staff_by_title_and_category() -> None:
+    staff = pd.DataFrame([
+        {"Staff_ID": "N1", "Job_Title": "Registered Nurse", "Department": "Emergency",
+         "Staff_Category": "Nursing"},
+        {"Staff_ID": "N2", "Job_Title": "Registered Nurse", "Department": "Emergency",
+         "Staff_Category": "Nursing"},
+        {"Staff_ID": "M1", "Job_Title": "Medical Officer", "Department": "Emergency",
+         "Staff_Category": "Clinical"},
+    ])
+    result = build_role_establishment(staff)
+    nurse = result.loc[result["Job_Title"].eq("Registered Nurse")].iloc[0]
+    assert nurse["Established_Staff"] == 2
+    assert set(result["Job_Title"]) == {"Registered Nurse", "Medical Officer"}
