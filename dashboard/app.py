@@ -24,6 +24,8 @@ from patient_flow.scenarios import (  # noqa: E402
     build_scenario_comparison,
     build_scenario_department_effects,
 )
+from patient_flow.costing import calculate_staffing_budget, format_mwk  # noqa: E402
+from patient_flow.uncertainty import bootstrap_wait_confidence_intervals  # noqa: E402
 
 DATA_PATH = PROJECT_ROOT / "data" / "processed" / "hospital_patient_flow_clean.csv"
 WAIT_COLUMN = "Total_Waiting_Time_Valid"
@@ -65,6 +67,11 @@ def minutes(value: float) -> str:
 
 def add_empty_state(message: str) -> None:
     st.info(message)
+
+
+@st.cache_data(show_spinner="Calculating bootstrap confidence intervals…")
+def cached_bootstrap_intervals(values: tuple[float, ...]) -> dict[str, float | int]:
+    return bootstrap_wait_confidence_intervals(pd.Series(values), n_bootstrap=500)
 
 
 def main() -> None:
@@ -157,6 +164,26 @@ def main() -> None:
         f"{n_waits:,} encounters have a usable total-wait value. "
         "Percentiles describe the upper tail as well as the typical encounter."
     )
+    if st.toggle("Estimate 95% bootstrap confidence intervals", value=False):
+        intervals = cached_bootstrap_intervals(tuple(waits.astype(float).tolist()))
+        ci_cols = st.columns(3)
+        ci_cols[0].metric(
+            "Median wait 95% CI",
+            f"{intervals['median_ci_lower']:.1f}–{intervals['median_ci_upper']:.1f} min",
+        )
+        ci_cols[1].metric(
+            "P90 wait 95% CI",
+            f"{intervals['p90_ci_lower']:.1f}–{intervals['p90_ci_upper']:.1f} min",
+        )
+        ci_cols[2].metric(
+            "Long-wait share 95% CI",
+            f"{intervals['long_wait_pct_ci_lower']:.1f}–{intervals['long_wait_pct_ci_upper']:.1f}%",
+        )
+        st.caption(
+            f"Percentile bootstrap, 500 replicates, {intervals['observations_used']:,} observations "
+            "used. Intervals reflect sampling variation within this synthetic cohort only; they "
+            "do not capture uncertainty in the simulation assumptions."
+        )
 
     overview_left, overview_right = st.columns(2)
     with overview_left:
@@ -376,6 +403,86 @@ def main() -> None:
             },
         )
         st.plotly_chart(chart, use_container_width=True)
+
+    st.divider()
+    st.subheader("Staffing budget planner — Malawi Kwacha (MWK)")
+    st.caption(
+        "Enter locally verified, fully loaded monthly staff costs. All figures are entered and "
+        "reported in MWK; this planner performs no USD conversion and does not supply market "
+        "salary estimates. Results are illustrative budget scenarios, not approved hospital costs."
+    )
+    with st.expander("Set staffing assumptions", expanded=True):
+        budget_months = st.number_input(
+            "Budget period (months)", min_value=1, max_value=36, value=12, step=1
+        )
+        roles = [
+            "Additional laboratory technician",
+            "Additional triage nurse",
+            "Additional doctor",
+            "Additional registration clerk",
+            "Additional pharmacy staff",
+        ]
+        budget_inputs: dict[str, dict[str, float | int]] = {}
+        for role in roles:
+            st.markdown(f"**{role}**")
+            staff_col, cost_col = st.columns(2)
+            staff_count = staff_col.number_input(
+                "Additional staff (FTE)",
+                min_value=0.0,
+                max_value=100.0,
+                value=0.0,
+                step=0.5,
+                key=f"budget_staff_{role}",
+            )
+            monthly_cost = cost_col.number_input(
+                "Fully loaded monthly cost per person (MWK)",
+                min_value=0.0,
+                max_value=1_000_000_000.0,
+                value=0.0,
+                step=50_000.0,
+                key=f"budget_cost_{role}",
+                help="Enter a verified local monthly cost including employer on-costs where appropriate.",
+            )
+            budget_inputs[role] = {
+                "additional_staff": staff_count,
+                "monthly_cost_mwk": monthly_cost,
+            }
+
+    budget = calculate_staffing_budget(budget_inputs, months=int(budget_months))
+    monthly_budget = float(budget["monthly_total_mwk"].sum()) if not budget.empty else 0.0
+    period_budget = float(budget["period_total_mwk"].sum()) if not budget.empty else 0.0
+    budget_kpis = st.columns(3)
+    budget_kpis[0].metric("Monthly incremental budget", format_mwk(monthly_budget))
+    budget_kpis[1].metric(f"{int(budget_months)}-month budget", format_mwk(period_budget))
+    budget_kpis[2].metric("Additional staff (FTE)", f"{budget['additional_staff'].sum():,.1f}")
+    if monthly_budget == 0:
+        st.info("Enter verified monthly staff costs and additional FTE assumptions to calculate a budget.")
+    else:
+        chart = px.bar(
+            budget.loc[budget["period_total_mwk"] > 0],
+            x="role",
+            y="period_total_mwk",
+            title=f"Incremental staffing budget over {int(budget_months)} months",
+            template=CHART_TEMPLATE,
+            labels={"role": "Staff category", "period_total_mwk": "Budget (MWK)"},
+        )
+        chart.update_layout(xaxis_tickangle=-20)
+        st.plotly_chart(chart, use_container_width=True)
+    st.dataframe(
+        budget.assign(
+            monthly_cost_per_person_mwk=budget["monthly_cost_per_person_mwk"].map(format_mwk),
+            monthly_total_mwk=budget["monthly_total_mwk"].map(format_mwk),
+            period_total_mwk=budget["period_total_mwk"].map(format_mwk),
+        ),
+        use_container_width=True,
+        hide_index=True,
+    )
+    st.download_button(
+        "Download staffing budget (MWK CSV)",
+        data=budget.to_csv(index=False).encode("utf-8"),
+        file_name="hospital_staffing_budget_mwk.csv",
+        mime="text/csv",
+    )
 
     st.divider()
     st.subheader("Data quality and audit")
