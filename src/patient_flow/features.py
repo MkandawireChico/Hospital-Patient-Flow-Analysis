@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import pandas as pd
 
+from patient_flow.flags import boolean_flag_column
+
 
 def add_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
     """Generate temporal features used in patient-flow audit and scenario analysis."""
@@ -31,8 +33,8 @@ def add_wait_quality_flags(df: pd.DataFrame) -> pd.DataFrame:
     """Flag long waits and invalid results that should be excluded from KPI summaries."""
     output = df.copy()
 
-    invalid_mask = output.get("Negative_Wait_Flag", pd.Series(False, index=output.index)).fillna(False).astype(bool)
-    invalid_mask |= output.get("Impossible_Timestamp_Flag", pd.Series(False, index=output.index)).fillna(False).astype(bool)
+    invalid_mask = boolean_flag_column(output, "Negative_Wait_Flag")
+    invalid_mask |= boolean_flag_column(output, "Impossible_Timestamp_Flag")
 
     if "Total_Waiting_Time_Valid" in output.columns:
         output["Total_Waiting_Time_Valid"] = pd.to_numeric(output["Total_Waiting_Time_Valid"], errors="coerce")
