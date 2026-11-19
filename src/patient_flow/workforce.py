@@ -60,6 +60,8 @@ def generate_monthly_roster(
                     "Staff_ID": person["Staff_ID"],
                     "Staff_Name": person["Staff_Name"],
                     "Job_Title": person["Job_Title"],
+                    "Staff_Category": person.get("Staff_Category", "Unclassified"),
+                    "Qualification": person.get("Qualification", "Not recorded"),
                     "Department": department,
                     "Shift": shift,
                     "Shift_Start": start_time,
@@ -84,6 +86,37 @@ def build_workforce_summary(roster: pd.DataFrame) -> pd.DataFrame:
         .sort_values(["Roster_Date", "Department", "Shift"])
         .reset_index(drop=True)
     )
+
+
+
+def build_role_coverage(roster: pd.DataFrame) -> pd.DataFrame:
+    """Summarise scheduled headcount and hours by department, shift and job title."""
+    required = {"Roster_Date", "Staff_ID", "Department", "Job_Title", "Shift", "Scheduled_Hours"}
+    missing = required.difference(roster.columns)
+    if missing:
+        raise ValueError(f"Roster data is missing columns: {sorted(missing)}")
+    working = roster.loc[roster["Shift"].ne("OFF")].copy()
+    if "Staff_Category" not in working.columns:
+        working["Staff_Category"] = "Unclassified"
+    return (working.groupby(["Roster_Date", "Department", "Shift", "Staff_Category", "Job_Title"], as_index=False, dropna=False)
+        .agg(Staff_On_Duty=("Staff_ID", "nunique"), Scheduled_Hours=("Scheduled_Hours", "sum"))
+        .sort_values(["Roster_Date", "Department", "Shift", "Staff_Category", "Job_Title"])
+        .reset_index(drop=True))
+
+
+def build_role_establishment(staff: pd.DataFrame) -> pd.DataFrame:
+    """Count registered establishment by department, category and job title."""
+    required = {"Staff_ID", "Department", "Job_Title"}
+    missing = required.difference(staff.columns)
+    if missing:
+        raise ValueError(f"Staff register is missing columns: {sorted(missing)}")
+    frame = staff.copy()
+    if "Staff_Category" not in frame.columns:
+        frame["Staff_Category"] = "Unclassified"
+    return (frame.groupby(["Department", "Staff_Category", "Job_Title"], as_index=False)
+        .agg(Established_Staff=("Staff_ID", "nunique"))
+        .sort_values(["Department", "Staff_Category", "Job_Title"])
+        .reset_index(drop=True))
 
 
 def assign_arrival_shift(hours: pd.Series) -> pd.Series:
