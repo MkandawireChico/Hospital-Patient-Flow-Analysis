@@ -38,6 +38,12 @@ All charts and KPI cards update for the filtered cohort. If a filter selection r
 11. **Data-quality audit:** flagged quality issues, exclusions, and missing wait values.
 12. **Filtered data export:** download the filtered valid cohort as CSV.
 
+### Long-wait classification
+
+Toggle **Train and evaluate the long-wait model** to fit an exploratory logistic-regression classifier on the current filtered cohort. It shows hold-out ROC AUC, average precision, recall, precision, F1, the ROC curve, confusion matrix, and the largest encoded coefficients. The model uses only encounter descriptors and arrival-time features. If the filtered cohort is too small or contains only one target class, the dashboard explains why evaluation is unavailable.
+
+The classifier is an exploratory synthetic-data demonstration, not a clinical decision tool. See [Analytical Methods](ANALYTICAL_METHODS.md) for feature exclusions, leakage safeguards, and validation requirements.
+
 ## Enter local costs in MWK
 
 The staffing budget planner starts at zero intentionally. For each role, enter the additional FTE and fully loaded monthly cost per person in Malawi Kwacha. Select the budget period. The dashboard calculates:
