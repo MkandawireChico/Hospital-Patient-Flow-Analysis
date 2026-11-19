@@ -100,7 +100,6 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
     start_date = pd.Timestamp(settings["start_date"])
     n_days = int(settings["n_days"])
     departments = settings["departments"]
-    staffing = settings["staffing"]
     shared = settings["shared_services"]
 
     department_codes = {
