@@ -194,6 +194,12 @@ if not coverage_view.empty:
         period_months=period_months,
         monthly_hours_per_fte=monthly_hours,
     )
+    valid_cost_date = pd.to_datetime(effective_date, errors="coerce")
+    sensitivity["cost_source"] = cost_source.strip()
+    sensitivity["cost_effective_date"] = effective_date.strip()
+    sensitivity["cost_assumption_complete"] = bool(
+        cost_source.strip() and pd.notna(valid_cost_date)
+    )
     metric_cols = st.columns(3)
     baseline_rate = sensitivity["baseline_demand_events_per_scheduled_hour"]
     scenario_rate = sensitivity["scenario_demand_events_per_scheduled_hour"]
