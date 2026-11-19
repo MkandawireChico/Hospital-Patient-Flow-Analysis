@@ -11,9 +11,6 @@ import pandas as pd
 from . import config as config_module
 
 
-AGE_GROUPS = ["0-4", "5-14", "15-24", "25-44", "45-64", "65+"]
-
-
 def _daytime_hour_probs(
     open_hour: int, close_hour: int, peak_start: int, peak_end: int
 ) -> np.ndarray:
@@ -22,18 +19,20 @@ def _daytime_hour_probs(
     return weights / weights.sum()
 
 
-def _emergency_hour_probs() -> np.ndarray:
-    weights = np.ones(24)
-    weights[18:22] = 2.5
-    weights[0:5] = 0.5
+def _emergency_hour_probs(pattern: dict[str, Any]) -> np.ndarray:
+    weights = np.full(24, float(pattern["default"]))
+    weights[list(pattern["evening_hours"])] = float(pattern["evening_peak"])
+    weights[list(pattern["early_morning_hours"])] = float(pattern["early_morning"])
     return weights / weights.sum()
 
 
-def _sample_arrival(department: dict[str, Any], day_start: pd.Timestamp) -> pd.Timestamp:
+def _sample_arrival(
+    department: dict[str, Any], day_start: pd.Timestamp, emergency_pattern: dict[str, Any]
+) -> pd.Timestamp:
     open_hour, close_hour = department["open"]
     peak_start, peak_end = department["peak"]
     if department["night"]:
-        hour = int(np.random.choice(range(24), p=_emergency_hour_probs()))
+        hour = int(np.random.choice(range(24), p=_emergency_hour_probs(emergency_pattern)))
     else:
         hour = int(np.random.choice(
             range(open_hour, close_hour),
@@ -64,35 +63,39 @@ def _process_queue(
     return starts, ends
 
 
-def _sample_age_group(department: str) -> str:
-    if department == "Paediatrics":
-        return str(np.random.choice(["0-4", "5-14"], p=[0.6, 0.4]))
-    if department == "Maternal Health":
-        return str(np.random.choice(["15-24", "25-44", "45-64"], p=[0.45, 0.50, 0.05]))
-    return str(np.random.choice(AGE_GROUPS, p=[0.10, 0.15, 0.20, 0.30, 0.17, 0.08]))
+def _sample_age_group(department: str, settings: dict[str, Any]) -> str:
+    demographics = settings["demographics"]
+    distribution = demographics["department_age_distributions"].get(department)
+    if distribution:
+        groups, probabilities = distribution["groups"], distribution["probabilities"]
+    else:
+        groups = demographics["age_groups"]
+        probabilities = demographics["default_age_distribution"]
+    return str(np.random.choice(groups, p=probabilities))
 
 
-def _sample_sex(department: str) -> str:
-    probabilities = [0.98, 0.02] if department == "Maternal Health" else [0.52, 0.48]
-    return str(np.random.choice(["Female", "Male"], p=probabilities))
+def _sample_sex(department: str, settings: dict[str, Any]) -> str:
+    demographics = settings["demographics"]
+    distribution = demographics["department_sex_distributions"].get(
+        department, demographics["default_sex_distribution"]
+    )
+    return str(np.random.choice(list(distribution), p=list(distribution.values())))
 
 
-def _sample_referral(department: str) -> str:
-    referred = 0.25 if department in ("Emergency", "Chronic Care", "TB/HIV Clinic") else 0.10
+def _sample_referral(department: str, settings: dict[str, Any]) -> str:
+    patterns = settings["encounter_patterns"]
+    referred = float(patterns["department_referral_probabilities"].get(
+        department, patterns["referral_probability"]
+    ))
     return str(np.random.choice(
-        ["Self-Presented", "Referred from Health Centre"],
-        p=[1 - referred, referred],
+        ["Self-Presented", "Referred from Health Centre"], p=[1 - referred, referred]
     ))
 
 
-def _sample_visit_type(department: str) -> str:
-    if department == "Emergency":
-        values, probabilities = ["Emergency", "New Visit", "Referral"], [0.75, 0.15, 0.10]
-    elif department in ("Chronic Care", "TB/HIV Clinic"):
-        values, probabilities = ["Follow-up", "New Visit", "Referral"], [0.75, 0.15, 0.10]
-    else:
-        values, probabilities = ["New Visit", "Follow-up", "Referral"], [0.55, 0.35, 0.10]
-    return str(np.random.choice(values, p=probabilities))
+def _sample_visit_type(department: str, settings: dict[str, Any]) -> str:
+    distributions = settings["encounter_patterns"]["visit_type_probabilities"]
+    distribution = distributions.get(department, distributions["default"])
+    return str(np.random.choice(list(distribution), p=list(distribution.values())))
 
 
 def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
@@ -103,14 +106,8 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
     departments = settings["departments"]
     shared = settings["shared_services"]
 
-    department_codes = {
-        "Outpatient Department": "OPD",
-        "Emergency": "EMG",
-        "Maternal Health": "MAT",
-        "Paediatrics": "PED",
-        "Chronic Care": "CHR",
-        "TB/HIV Clinic": "TBH",
-    }
+    department_codes = settings["department_codes"]
+    emergency_pattern = settings["arrival_patterns"]["emergency_hour_weights"]
     records: list[dict[str, Any]] = []
     patient_counter = 0
 
@@ -129,7 +126,9 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
             if not n_patients:
                 continue
 
-            arrivals = sorted(_sample_arrival(dept, day_start) for _ in range(n_patients))
+            arrivals = sorted(
+                _sample_arrival(dept, day_start, emergency_pattern) for _ in range(n_patients)
+            )
             reg_starts, reg_ends = _process_queue(
                 arrivals,
                 int(dept["registration_staff"]),
@@ -162,12 +161,19 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
                 priority = str(priorities[index])
                 lab_probability = float(dept["laboratory_probability"])
                 if priority != "Routine":
-                    lab_probability *= 1.3
+                    lab_probability *= float(
+                        settings["behaviour"]["non_routine_laboratory_probability_multiplier"]
+                    )
                 lab_requested = np.random.random() < lab_probability
                 pharmacy_needed = np.random.random() < float(dept["pharmacy_probability"])
                 admission_probability = float(dept["admission_probability"][priority])
+                disposition_distribution = settings["behaviour"][
+                    "non_admitted_disposition_probabilities"
+                ]
                 disposition = "Admitted" if np.random.random() < admission_probability else str(
-                    np.random.choice(["Discharged", "Referred Out"], p=[0.95, 0.05])
+                    np.random.choice(
+                        list(disposition_distribution), p=list(disposition_distribution.values())
+                    )
                 )
                 day_records.append({
                     "Patient_ID": f"PT-{patient_counter:07d}",
@@ -186,10 +192,10 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
                     "Laboratory_Requested": bool(lab_requested),
                     "Pharmacy_Needed": bool(pharmacy_needed),
                     "Disposition": disposition,
-                    "Age_Group": _sample_age_group(department),
-                    "Sex": _sample_sex(department),
-                    "Referral_Status": _sample_referral(department),
-                    "Visit_Type": _sample_visit_type(department),
+                    "Age_Group": _sample_age_group(department, settings),
+                    "Sex": _sample_sex(department, settings),
+                    "Referral_Status": _sample_referral(department, settings),
+                    "Visit_Type": _sample_visit_type(department, settings),
                     "Doctor_ID": (
                         f"DOC-{department_codes[department]}-"
                         f"{np.random.randint(1, int(dept['doctors']) + 1)}"
@@ -227,7 +233,7 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
-def _add_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
+def _add_derived_fields(df: pd.DataFrame, config: dict[str, Any]) -> pd.DataFrame:
     output = df.copy()
     output["Wait_For_Registration_Min"] = (
         output["Registration_Time"] - output["Arrival_Time"]
@@ -285,16 +291,20 @@ def _add_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
 
     output["Final_Stage_End_Time"] = output.apply(final_end, axis=1)
     admitted = output["Disposition"].eq("Admitted")
-    admission_extra = np.where(admitted, np.random.uniform(30, 120, len(output)), 0.0)
+    stay_min, stay_max = config["simulation"]["behaviour"]["admission_extra_stay_minutes"]
+    admission_extra = np.where(admitted, np.random.uniform(stay_min, stay_max, len(output)), 0.0)
     output["Total_Length_of_Stay"] = (
         (output["Final_Stage_End_Time"] - output["Arrival_Time"]).dt.total_seconds() / 60
         + admission_extra
     )
-    wait_component = (output["Total_Waiting_Time"] / 30).clip(upper=4)
-    admission_component = np.where(admitted, 0.4, 0.0)
-    noise = np.random.normal(0, 0.6, len(output))
+    satisfaction = config["simulation"]["behaviour"]["satisfaction"]
+    wait_component = (
+        output["Total_Waiting_Time"] / float(satisfaction["wait_penalty_divisor_minutes"])
+    ).clip(upper=float(satisfaction["maximum_wait_penalty"]))
+    admission_component = np.where(admitted, float(satisfaction["admission_penalty"]), 0.0)
+    noise = np.random.normal(0, float(satisfaction["noise_standard_deviation"]), len(output))
     output["Patient_Satisfaction_Score"] = (
-        5 - wait_component - admission_component + noise
+        float(satisfaction["baseline_score"]) - wait_component - admission_component + noise
     ).round().clip(1, 5).astype(int)
     return output
 
@@ -310,26 +320,35 @@ def _inject_quality_issues(df: pd.DataFrame, config: dict[str, Any]) -> pd.DataF
     outlier_rate = float(issue["los_outlier_rate"])
     department_rate = float(issue["department_error_rate"])
 
-    satisfaction_idx = output.sample(frac=missing_satisfaction, random_state=10).index
+    states = issue["random_states"]
+    satisfaction_idx = output.sample(
+        frac=missing_satisfaction, random_state=states["missing_satisfaction"]
+    ).index
     output.loc[satisfaction_idx, "Patient_Satisfaction_Score"] = np.nan
-    referral_idx = output.sample(frac=missing_referral, random_state=11).index
+    referral_idx = output.sample(
+        frac=missing_referral, random_state=states["missing_referral"]
+    ).index
     output.loc[referral_idx, "Referral_Status"] = np.nan
-    duplicate_idx = output.sample(frac=duplicate_rate, random_state=20).index
+    duplicate_idx = output.sample(frac=duplicate_rate, random_state=states["duplicates"]).index
     output = pd.concat([output, output.loc[duplicate_idx]], ignore_index=True)
 
-    impossible_idx = output.sample(frac=impossible_rate, random_state=30).index
+    impossible_idx = output.sample(
+        frac=impossible_rate, random_state=states["impossible_timestamps"]
+    ).index
     output.loc[impossible_idx, "Consultation_Start_Time"] = (
         output.loc[impossible_idx, "Arrival_Time"] - pd.Timedelta(minutes=15)
     )
-    negative_idx = output.sample(frac=negative_rate, random_state=40).index
+    negative_idx = output.sample(frac=negative_rate, random_state=states["negative_waits"]).index
     output.loc[negative_idx, "Total_Waiting_Time"] = (
         -np.abs(output.loc[negative_idx, "Total_Waiting_Time"])
         - np.random.uniform(1, 20, len(negative_idx))
     )
-    outlier_idx = output.sample(frac=outlier_rate, random_state=50).index
+    outlier_idx = output.sample(frac=outlier_rate, random_state=states["los_outliers"]).index
     output.loc[outlier_idx, "Total_Length_of_Stay"] *= np.random.uniform(5, 8, len(outlier_idx))
-    bad_department_idx = output.sample(frac=department_rate, random_state=60).index
-    bad_department_values = ["OPD ", "emergency", "Unknown", "PAEDS", "Outpatient department"]
+    bad_department_idx = output.sample(
+        frac=department_rate, random_state=states["department_errors"]
+    ).index
+    bad_department_values = issue["department_error_values"]
     output.loc[bad_department_idx, "Department"] = np.random.choice(
         bad_department_values, size=len(bad_department_idx)
     )
@@ -345,14 +364,8 @@ def generate_case_study_data(
     are loaded from config/default.yaml unless another YAML path is supplied.
     """
     config_file = Path(config_path) if config_path else config_module.DEFAULT_CONFIG_PATH
-    if config_file.resolve() == config_module.DEFAULT_CONFIG_PATH.resolve():
-        config = config_module.load_default_config()
-    else:
-        import yaml
-
-        with config_file.open("r", encoding="utf-8") as handle:
-            config = yaml.safe_load(handle) or {}
-    clean = _add_derived_fields(_build_encounters(config))
+    config = config_module.load_config(config_file)
+    clean = _add_derived_fields(_build_encounters(config), config)
     raw = _inject_quality_issues(clean, config)
     return clean, raw
 
@@ -363,16 +376,7 @@ def generate_and_save_raw_dataset(
 ) -> tuple[pd.DataFrame, Path]:
     """Generate the configured raw dataset, save it, and return the data and path."""
     config_file = Path(config_path) if config_path else config_module.DEFAULT_CONFIG_PATH
-    config = (
-        config_module.load_default_config()
-        if config_file.resolve() == config_module.DEFAULT_CONFIG_PATH.resolve()
-        else None
-    )
-    if config is None:
-        import yaml
-
-        with config_file.open("r", encoding="utf-8") as handle:
-            config = yaml.safe_load(handle) or {}
+    config = config_module.load_config(config_file)
     _, raw = generate_case_study_data(config_file)
     configured_path = Path(config["paths"]["raw"])
     if not configured_path.is_absolute():
