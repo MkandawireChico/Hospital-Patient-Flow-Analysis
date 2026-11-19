@@ -239,7 +239,9 @@ def _add_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
         output["Consultation_Start_Time"] - output["Triage_End_Time"]
     ).dt.total_seconds() / 60
     output["Total_Waiting_Time"] = (
-        output["Wait_For_Registration_Min"] + output["Wait_For_Triage_Min"] + output["Wait_For_Consultation_Min"]
+        output["Wait_For_Registration_Min"]
+        + output["Wait_For_Triage_Min"]
+        + output["Wait_For_Consultation_Min"]
     )
     output["Consultation_Duration"] = (
         output["Consultation_End_Time"] - output["Consultation_Start_Time"]
