@@ -13,7 +13,9 @@ from patient_flow.config import DEFAULT_CONFIG_PATH, load_default_config
 AGE_GROUPS = ["0-4", "5-14", "15-24", "25-44", "45-64", "65+"]
 
 
-def _daytime_hour_probs(open_hour: int, close_hour: int, peak_start: int, peak_end: int) -> np.ndarray:
+def _daytime_hour_probs(
+    open_hour: int, close_hour: int, peak_start: int, peak_end: int
+) -> np.ndarray:
     hours = range(open_hour, close_hour)
     weights = np.array([4.0 if peak_start <= hour < peak_end else 1.0 for hour in hours])
     return weights / weights.sum()
@@ -118,15 +120,31 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
         day_records: list[dict[str, Any]] = []
 
         for department, dept in departments.items():
-            weekend_factor = float(dept["weekend_multiplier"]) if day_name in ("Saturday", "Sunday") else 1.0
+            weekend_factor = (
+                float(dept["weekend_multiplier"])
+                if day_name in ("Saturday", "Sunday")
+                else 1.0
+            )
             n_patients = int(np.random.poisson(float(dept["daily_mean"]) * weekend_factor))
             if not n_patients:
                 continue
 
             arrivals = sorted(_sample_arrival(dept, day_start) for _ in range(n_patients))
-            reg_starts, reg_ends = _process_queue(arrivals, int(dept["registration_staff"]), tuple(dept["registration_duration"]))
-            triage_starts, triage_ends = _process_queue(reg_ends, int(dept["triage_staff"]), tuple(dept["triage_duration"]))
-            consult_starts, consult_ends = _process_queue(triage_ends, int(dept["doctors"]), tuple(dept["consultation_duration"]))
+            reg_starts, reg_ends = _process_queue(
+                arrivals,
+                int(dept["registration_staff"]),
+                tuple(dept["registration_duration"]),
+            )
+            triage_starts, triage_ends = _process_queue(
+                reg_ends,
+                int(dept["triage_staff"]),
+                tuple(dept["triage_duration"]),
+            )
+            consult_starts, consult_ends = _process_queue(
+                triage_ends,
+                int(dept["doctors"]),
+                tuple(dept["consultation_duration"]),
+            )
 
             consult_array = np.array(consult_starts)
             arrival_array = np.array(arrivals)
@@ -172,7 +190,10 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
                     "Sex": _sample_sex(department),
                     "Referral_Status": _sample_referral(department),
                     "Visit_Type": _sample_visit_type(department),
-                    "Doctor_ID": f"DOC-{department_codes[department]}-{np.random.randint(1, int(dept['doctors']) + 1)}",
+                    "Doctor_ID": (
+                        f"DOC-{department_codes[department]}-"
+                        f"{np.random.randint(1, int(dept['doctors']) + 1)}"
+                    ),
                 })
 
         lab_config = shared["laboratory"]
@@ -182,7 +203,9 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
         )
         if lab_records:
             ready = [row["Consultation_End_Time"] for row in lab_records]
-            starts, ends = _process_queue(ready, int(lab_config["servers"]), tuple(lab_config["duration"]))
+            starts, ends = _process_queue(
+                ready, int(lab_config["servers"]), tuple(lab_config["duration"])
+            )
             for row, start, end in zip(lab_records, starts, ends):
                 row["Laboratory_Start_Time"], row["Laboratory_End_Time"] = start, end
 
@@ -193,7 +216,9 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
         pharmacy_records.sort(key=lambda row: row["_pharm_ready"])
         if pharmacy_records:
             ready = [row["_pharm_ready"] for row in pharmacy_records]
-            starts, ends = _process_queue(ready, int(pharmacy_config["servers"]), tuple(pharmacy_config["duration"]))
+            starts, ends = _process_queue(
+                ready, int(pharmacy_config["servers"]), tuple(pharmacy_config["duration"])
+            )
             for row, start, end in zip(pharmacy_records, starts, ends):
                 row["Pharmacy_Start_Time"], row["Pharmacy_End_Time"] = start, end
 
@@ -204,15 +229,27 @@ def _build_encounters(config: dict[str, Any]) -> pd.DataFrame:
 
 def _add_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
     output = df.copy()
-    output["Wait_For_Registration_Min"] = (output["Registration_Time"] - output["Arrival_Time"]).dt.total_seconds() / 60
-    output["Wait_For_Triage_Min"] = (output["Triage_Start_Time"] - output["Registration_End_Time"]).dt.total_seconds() / 60
-    output["Wait_For_Consultation_Min"] = (output["Consultation_Start_Time"] - output["Triage_End_Time"]).dt.total_seconds() / 60
+    output["Wait_For_Registration_Min"] = (
+        output["Registration_Time"] - output["Arrival_Time"]
+    ).dt.total_seconds() / 60
+    output["Wait_For_Triage_Min"] = (
+        output["Triage_Start_Time"] - output["Registration_End_Time"]
+    ).dt.total_seconds() / 60
+    output["Wait_For_Consultation_Min"] = (
+        output["Consultation_Start_Time"] - output["Triage_End_Time"]
+    ).dt.total_seconds() / 60
     output["Total_Waiting_Time"] = (
         output["Wait_For_Registration_Min"] + output["Wait_For_Triage_Min"] + output["Wait_For_Consultation_Min"]
     )
-    output["Consultation_Duration"] = (output["Consultation_End_Time"] - output["Consultation_Start_Time"]).dt.total_seconds() / 60
-    output["Registration_Duration"] = (output["Registration_End_Time"] - output["Registration_Time"]).dt.total_seconds() / 60
-    output["Triage_Duration"] = (output["Triage_End_Time"] - output["Triage_Start_Time"]).dt.total_seconds() / 60
+    output["Consultation_Duration"] = (
+        output["Consultation_End_Time"] - output["Consultation_Start_Time"]
+    ).dt.total_seconds() / 60
+    output["Registration_Duration"] = (
+        output["Registration_End_Time"] - output["Registration_Time"]
+    ).dt.total_seconds() / 60
+    output["Triage_Duration"] = (
+        output["Triage_End_Time"] - output["Triage_Start_Time"]
+    ).dt.total_seconds() / 60
     output["Laboratory_Wait_Time"] = np.where(
         output["Laboratory_Requested"],
         (output["Laboratory_Start_Time"] - output["Consultation_End_Time"]).dt.total_seconds() / 60,
@@ -324,7 +361,11 @@ def generate_and_save_raw_dataset(
 ) -> tuple[pd.DataFrame, Path]:
     """Generate the configured raw dataset, save it, and return the data and path."""
     config_file = Path(config_path) if config_path else DEFAULT_CONFIG_PATH
-    config = load_default_config() if config_file.resolve() == DEFAULT_CONFIG_PATH.resolve() else None
+    config = (
+        load_default_config()
+        if config_file.resolve() == DEFAULT_CONFIG_PATH.resolve()
+        else None
+    )
     if config is None:
         import yaml
 
