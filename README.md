@@ -70,6 +70,13 @@ The screenshots below show the deployed application’s main analytical and work
       <a href="docs/images/08-capacity-centre-overview.jpg.png"><img src="docs/images/08-capacity-centre-overview.jpg.png" alt="Workforce capacity sensitivity and planning view" width="100%"></a>
     </td>
   </tr>
+  <tr>
+    <td width="50%">
+      <strong>9. MWK staffing budget planner</strong><br>
+      <a href="docs/images/009-mwk-planner.jpg.png"><img src="docs/images/009-mwk-planner.jpg.png" alt="Role-based staffing budget planner showing additional FTE and budget totals in Malawi Kwacha" width="100%"></a>
+    </td>
+    <td width="50%"></td>
+  </tr>
 </table>
 
 [Browse all uploaded application screenshots](docs/images/).
