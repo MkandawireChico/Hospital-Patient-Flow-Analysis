@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-import patient_flow.config as config
+import patient_flow.config as config_module
 
 
 AGE_GROUPS = ["0-4", "5-14", "15-24", "25-44", "45-64", "65+"]
@@ -343,9 +343,9 @@ def generate_case_study_data(
     Returns (clean_simulation, raw_dataset). Random seeds and all model parameters
     are loaded from config/default.yaml unless another YAML path is supplied.
     """
-    config_file = Path(config_path) if config_path else config.DEFAULT_CONFIG_PATH
-    if config_file.resolve() == config.DEFAULT_CONFIG_PATH.resolve():
-        config = config.load_default_config()
+    config_file = Path(config_path) if config_path else config_module.DEFAULT_CONFIG_PATH
+    if config_file.resolve() == config_module.DEFAULT_CONFIG_PATH.resolve():
+        config = config_module.load_default_config()
     else:
         import yaml
 
@@ -361,10 +361,10 @@ def generate_and_save_raw_dataset(
     output_path: str | Path | None = None,
 ) -> tuple[pd.DataFrame, Path]:
     """Generate the configured raw dataset, save it, and return the data and path."""
-    config_file = Path(config_path) if config_path else config.DEFAULT_CONFIG_PATH
+    config_file = Path(config_path) if config_path else config_module.DEFAULT_CONFIG_PATH
     config = (
-        config.load_default_config()
-        if config_file.resolve() == config.DEFAULT_CONFIG_PATH.resolve()
+        config_module.load_default_config()
+        if config_file.resolve() == config_module.DEFAULT_CONFIG_PATH.resolve()
         else None
     )
     if config is None:
