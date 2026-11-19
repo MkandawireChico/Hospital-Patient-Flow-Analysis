@@ -18,7 +18,7 @@ Run `python -m patient_flow.workforce` from the repository root to regenerate `d
 
 ## Interpreting workload measures
 
-Demand events per rostered staff member and encounters per scheduled staff-hour are workload indicators. They are useful for comparing patterns across departments and shifts, but they do not adjust for patient acuity, service type, skill mix, non-clinical duties, leave, handovers, or differences in care complexity. They must not be interpreted as clinical productivity scores, staffing thresholds or safe-staffing recommendations. A real staffing model would require validated establishment data, role-specific activity, local labour rules and clinical governance.
+Demand events per rostered staff member and demand events per scheduled staff-hour are workload indicators. They are useful for comparing patterns across departments and shifts, but they do not adjust for patient acuity, service type, skill mix, non-clinical duties, leave, handovers, or differences in care complexity. They must not be interpreted as clinical productivity scores, staffing thresholds or safe-staffing recommendations. A real staffing model would require validated establishment data, role-specific activity, local labour rules and clinical governance.
 
 ## Data governance
 
