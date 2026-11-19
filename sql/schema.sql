@@ -66,7 +66,7 @@ CREATE TABLE encounters (
     "Arrival_Hour"                INTEGER,
     "Peak_Period"                 TEXT,      -- Peak / Non-Peak
     "Long_Wait_Flag"              INTEGER,   -- 0/1, Total_Waiting_Time_Valid > 60
-    "High_Congestion_Flag"        INTEGER,   -- 0/1, department-relative queue size
+    "High_Congestion_Flag"        INTEGER,   -- 0/1, hospital-wide upper-quartile queue-size threshold
     "Impossible_Timestamp_Flag"   INTEGER,
     "Negative_Wait_Flag"          INTEGER,
     "LOS_Outlier_Flag"            INTEGER,
