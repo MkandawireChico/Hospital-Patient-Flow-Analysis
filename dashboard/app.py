@@ -16,7 +16,6 @@ if str(PROJECT_ROOT / "src") not in sys.path:
 from patient_flow.analysis import (  # noqa: E402
     filter_analysis_frame,
     summarise_arrivals_by_hour,
-    summarise_peak_vs_offpeak,
     summarise_priority_differences,
     summarise_waits_by_department,
     summarise_waits_by_stage,
