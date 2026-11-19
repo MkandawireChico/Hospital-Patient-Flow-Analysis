@@ -3,4 +3,9 @@ __pycache__/
 .ipynb_checkpoints/
 .DS_Store
 .venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+data/reference/staff_roster_synthetic.csv
+.streamlit/secrets.toml
 venv/
