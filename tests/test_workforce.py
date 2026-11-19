@@ -155,6 +155,7 @@ def test_service_wait_summary_maps_stage_waits_to_workforce_units() -> None:
         "Laboratory_Wait_Time": [100.0, None, 0.0],
         "Pharmacy_Wait_Time": [None, 75.0, 0.0],
         "Wait_For_Registration_Min": [5.0, 10.0, 15.0],
+        "Total_Waiting_Time_Valid": [125.0, 165.0, 55.0],
         "Negative_Wait_Flag": [False, False, False],
         "Impossible_Timestamp_Flag": [False, False, False],
     })
