@@ -34,9 +34,9 @@ All charts and KPI cards update for the filtered cohort. If a filter selection r
 7. **Priority comparison:** median and P90 by recorded priority.
 8. **What-if scenarios:** baseline versus consultation wait-reduction scenarios.
 9. **Bootstrap intervals:** optional 95% confidence intervals for median, P90, and long-wait share.
-10. **MWK staffing budget planner:** enter additional FTE and verified monthly fully loaded staff cost per person. Results show monthly and selected-period budgets in MWK.
-11. **Data-quality audit:** flagged quality issues, exclusions, and missing wait values.
-12. **Filtered data export:** download the filtered valid cohort as CSV.
+11. **MWK staffing budget planner:** enter additional FTE and verified monthly fully loaded staff cost per person. Results show monthly and selected-period budgets in MWK.
+12. **Data-quality audit:** flagged quality issues, exclusions, and missing wait values.
+13. **Filtered data export:** download the filtered valid cohort as CSV.
 
 ### Long-wait classification
 
