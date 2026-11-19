@@ -117,12 +117,44 @@ def build_demand_coverage(
     arrival = pd.to_datetime(frame["Arrival_Time"], errors="coerce")
     frame["Roster_Date"] = arrival.dt.strftime("%Y-%m-%d")
     frame["Shift"] = assign_arrival_shift(arrival.dt.hour)
-    demand = (
+    demand_frames: list[pd.DataFrame] = []
+
+    # Clinical services are represented by encounter department.
+    clinical = (
         frame.dropna(subset=["Roster_Date", "Department", "Shift"])
         .groupby(["Roster_Date", "Department", "Shift"], as_index=False)
         .size()
-        .rename(columns={"size": "Encounter_Arrivals"})
+        .rename(columns={"size": "Demand_Events"})
     )
+    clinical["Demand_Basis"] = "Department encounter arrivals"
+    demand_frames.append(clinical)
+
+    # Laboratory and pharmacy demand is derived from recorded stage use, not
+    # from the encounter's owning department. Arrival shift is a timing proxy
+    # because service-stage start timestamps are not consistently available.
+    for column, department, basis in [
+        ("Laboratory_Wait_Time", "Laboratory", "Recorded laboratory-stage events"),
+        ("Pharmacy_Wait_Time", "Pharmacy", "Recorded pharmacy-stage events"),
+        ("Wait_For_Registration_Min", "Administration", "Recorded registration-stage events"),
+    ]:
+        if column not in frame.columns:
+            continue
+        service = frame.loc[frame[column].notna()].copy()
+        service = service.dropna(subset=["Roster_Date", "Shift"])
+        if service.empty:
+            continue
+        grouped = (
+            service.groupby(["Roster_Date", "Shift"], as_index=False)
+            .size()
+            .rename(columns={"size": "Demand_Events"})
+        )
+        grouped["Department"] = department
+        grouped["Demand_Basis"] = basis
+        demand_frames.append(grouped)
+
+    demand = pd.concat(demand_frames, ignore_index=True)
+    demand["Encounter_Arrivals"] = demand["Demand_Events"]
+    demand["Demand_Shift_Basis"] = "Arrival shift; service-stage shift is not observed"
     coverage = build_workforce_summary(roster)
     result = demand.merge(
         coverage,
