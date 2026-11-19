@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any
 
 import pandas as pd
-
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
@@ -20,7 +19,6 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-
 from patient_flow.analysis import LONG_WAIT_THRESHOLD_MINUTES, filter_analysis_frame
 
 
