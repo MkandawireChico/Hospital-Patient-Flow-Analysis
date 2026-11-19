@@ -132,11 +132,11 @@ The dashboard can estimate 95% percentile-bootstrap confidence intervals for the
 
 The current project is a strong demonstration of the analytics workflow, but several extensions would make it more decision-ready:
 
-1. Add bootstrap confidence intervals for P90 and long-wait shares.
-2. Evaluate whether observed group differences persist after adjusting for department, priority, visit type, and arrival time.
-3. Model arrival volume and service capacity explicitly, rather than changing wait values directly.
-4. Test scenario assumptions across a range of intervention sizes and staffing constraints.
-5. Add a database-backed analytical layer and automated data validation.
+1. Replace the reference-only YAML settings and notebook-specific generator with one configuration-driven, tested raw-data generation module so the simulation can be reproduced from a single source of truth.
+2. Evaluate whether observed group differences persist after adjusting for department, priority, visit type, and arrival time, using methods that account for shared queues and clustered observations.
+3. Model arrival volume and service capacity explicitly, rather than changing wait values directly in what-if scenarios.
+4. Test scenario assumptions across a range of intervention sizes, role mixes and shift constraints.
+5. Extend SQL regression checks so its valid-wait cohort and rates reconcile exactly with the Python baseline outputs.
 6. Validate dashboard accessibility, performance, and behaviour on larger datasets.
 7. If real data ever becomes available, establish governance, de-identification, data-sharing approval, and clinical/operational review before analysis.
 
