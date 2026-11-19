@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from patient_flow.config import load_default_config, DEFAULT_CONFIG_PATH
+from patient_flow.config import DEFAULT_CONFIG_PATH, load_default_config
 
 
 AGE_GROUPS = ["0-4", "5-14", "15-24", "25-44", "45-64", "65+"]
