@@ -84,6 +84,22 @@ python -m patient_flow.cli run
 streamlit run dashboard/app.py
 ```
 
+## Local budget planning in Malawi Kwacha (MWK)
+
+The interactive dashboard includes an incremental staffing budget planner denominated entirely in **MWK**. Users enter:
+
+- Additional full-time-equivalent staff by role.
+- Verified or explicitly assumed fully loaded monthly cost per staff member.
+- The budget period in months.
+
+The planner calculates monthly and period totals, visualises the allocation by role, and exports the assumptions and results to CSV. It does not convert USD, fetch exchange rates, or invent salary benchmarks. The zero-value starting inputs are deliberate: local payroll scales, allowances, pension contributions, and employer on-costs should be confirmed with an appropriate Malawi source before a budget is treated as decision-ready.
+
+The dashboard does not assign a monetary value to patient waiting time. Monetising patient time, clinical harm, or delayed care would require a defensible local valuation method and stakeholder approval; a speculative monetary figure would be misleading.
+
+## Statistical uncertainty
+
+The dashboard can estimate 95% percentile-bootstrap confidence intervals for the median wait, P90 wait, and share of waits above 60 minutes. The calculation uses 500 bootstrap replicates and a reproducible sample of up to 5,000 valid waits for responsiveness. These intervals describe sampling variation in the selected synthetic cohort only. They do not represent uncertainty in the simulation design, omitted variables, or the effect of a real-world intervention.
+
 ## Technical skills demonstrated
 
 - Python package structure and command-line execution.
