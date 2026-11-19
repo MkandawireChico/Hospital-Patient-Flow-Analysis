@@ -97,14 +97,21 @@ def main() -> None:
     if "Visit_Date" in data.columns:
         dates = pd.to_datetime(data["Visit_Date"], errors="coerce").dropna()
         if not dates.empty:
-            start, end = st.sidebar.date_input(
+            selected_dates = st.sidebar.date_input(
                 "Visit date range",
                 value=(dates.min().date(), dates.max().date()),
                 min_value=dates.min().date(),
                 max_value=dates.max().date(),
             )
-            if isinstance(start, tuple):
-                start, end = start
+            if isinstance(selected_dates, (tuple, list)):
+                if len(selected_dates) >= 2 and selected_dates[1] is not None:
+                    start, end = selected_dates[0], selected_dates[1]
+                elif len(selected_dates) == 1:
+                    start = end = selected_dates[0]
+                else:
+                    start, end = dates.min().date(), dates.max().date()
+            else:
+                start = end = selected_dates
             data["_visit_date"] = pd.to_datetime(data["Visit_Date"], errors="coerce")
             data = data.loc[data["_visit_date"].dt.date.between(start, end)].copy()
 
@@ -266,7 +273,7 @@ def main() -> None:
         st.subheader("Monthly waiting-time trend")
         if "Visit_Date" in cohort.columns:
             monthly = cohort.copy()
-            monthly["_month"] = pd.to_datetime(monthly["Visit_Date"], errors="coerce").dt.to_period("M").astype(str)
+            monthly["_month"] = pd.to_datetime(monthly["Visit_Date"], errors="coerce").dt.strftime("%Y-%m")
             monthly["_wait"] = pd.to_numeric(monthly[wait_col], errors="coerce")
             monthly = monthly.dropna(subset=["_wait", "_month"])
             if not monthly.empty:
