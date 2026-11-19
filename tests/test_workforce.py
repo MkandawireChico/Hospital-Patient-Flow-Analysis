@@ -1,6 +1,11 @@
 import pandas as pd
 
-from patient_flow.workforce import build_workforce_summary, generate_monthly_roster
+from patient_flow.workforce import (
+    assign_arrival_shift,
+    build_demand_coverage,
+    build_workforce_summary,
+    generate_monthly_roster,
+)
 
 
 def sample_staff() -> pd.DataFrame:
@@ -35,3 +40,26 @@ def test_summary_counts_unique_staff_and_scheduled_hours() -> None:
     assert {"Roster_Date", "Department", "Shift", "Staff_On_Duty", "Scheduled_Hours"} <= set(summary.columns)
     assert (summary["Staff_On_Duty"] >= 1).all()
     assert (summary["Scheduled_Hours"] == summary["Staff_On_Duty"] * 8).all()
+
+
+def test_arrival_shift_mapping_handles_day_boundaries() -> None:
+    hours = pd.Series([0, 6, 7, 14, 15, 22, 23, 23.5])
+    assert assign_arrival_shift(hours).tolist() == [
+        "NIGHT", "NIGHT", "DAY", "DAY", "EVENING", "EVENING", "NIGHT", "NIGHT"
+    ]
+
+
+def test_demand_coverage_joins_arrivals_to_rostered_staff() -> None:
+    staff = pd.DataFrame([
+        {"Staff_ID": "S1", "Staff_Name": "A Banda", "Job_Title": "Nurse", "Department": "Emergency"},
+        {"Staff_ID": "S2", "Staff_Name": "B Phiri", "Job_Title": "Nurse", "Department": "Emergency"},
+    ])
+    roster = generate_monthly_roster(staff, start_date="2026-01-01", days=1)
+    encounters = pd.DataFrame({
+        "Department": ["Emergency", "Emergency"],
+        "Arrival_Time": ["2026-01-01 08:00:00", "2026-01-01 09:15:00"],
+    })
+    result = build_demand_coverage(encounters, roster)
+    assert result["Encounter_Arrivals"].sum() == 2
+    assert result.iloc[0]["Staff_On_Duty"] >= 1
+    assert result.iloc[0]["Encounters_Per_Staff"] > 0
