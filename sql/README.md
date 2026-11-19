@@ -50,5 +50,5 @@ sqlite3 hospital_patient_flow.db < queries/01_volume_and_trends.sql
 ## Business questions each file answers
 
 - **01 — Volume & trends:** How many patients, when, and is there a real trend or just daily noise?
-- **02 — Waiting time:** How long do patients actually wait, who waits longest, and does triage priority actually reduce wait as intended?
+- **02 — Waiting time:** How long do patients wait by department, recorded priority and age group? Priority differences are descriptive: the simulation uses first-come, first-served consultation queues, so this query does not test triage effectiveness.
 - **03 — Performance ranking:** Which department most needs operational attention, and is that attention question answerable with a single number rather than four separate charts?
