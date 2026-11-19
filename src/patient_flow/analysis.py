@@ -22,9 +22,20 @@ def load_processed_data(path: str) -> pd.DataFrame:
 
 
 def _boolean_column(df: pd.DataFrame, column: str) -> pd.Series:
+    """Parse boolean flags safely, including values read from CSV as strings."""
     if column not in df.columns:
         return pd.Series(False, index=df.index)
-    return df[column].fillna(False).astype(bool)
+    values = df[column]
+    if pd.api.types.is_bool_dtype(values):
+        return values.fillna(False).astype(bool)
+    return (
+        values.astype("string")
+        .str.strip()
+        .str.casefold()
+        .isin({"true", "1", "yes", "y"})
+        .fillna(False)
+        .astype(bool)
+    )
 
 
 def _wait_column(df: pd.DataFrame) -> str:
