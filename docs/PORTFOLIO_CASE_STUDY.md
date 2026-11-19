@@ -7,6 +7,8 @@
 </p>
 
 
+For a concise recruiter/interviewer walkthrough, see the [Portfolio Presentation Guide](PORTFOLIO_PRESENTATION.md), which includes a five-minute demo sequence and CV-ready project entry.
+
 ## Executive summary
 
 This project demonstrates how a data scientist can turn operational event data into an auditable decision-support workflow. Using a structured Malawi-inspired district-hospital case study, it examines waiting-time patterns across registration, triage, consultation, laboratory, and pharmacy-related stages.
