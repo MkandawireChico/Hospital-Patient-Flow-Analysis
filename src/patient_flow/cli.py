@@ -54,7 +54,7 @@ def main() -> None:
     run_parser.set_defaults(handler=lambda: print(run_pipeline()))
 
     analyse_parser = subparsers.add_parser(
-        "analyse", help="Generate department-level waiting summaries"
+        "analyse", help="Generate baseline, scenario and decision-summary outputs from processed data"
     )
     analyse_parser.set_defaults(handler=lambda: print(export_analysis_pipeline()))
 
