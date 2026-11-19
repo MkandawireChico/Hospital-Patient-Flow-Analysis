@@ -50,7 +50,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Patient flow CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    run_parser = subparsers.add_parser("run", help="Reproduce the raw and cleaned datasets")
+    run_parser = subparsers.add_parser("run", help="Rebuild the processed dataset and analysis outputs from the committed raw CSV")
     run_parser.set_defaults(handler=lambda: print(run_pipeline()))
 
     analyse_parser = subparsers.add_parser(
