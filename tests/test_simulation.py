@@ -19,7 +19,11 @@ def test_simulation_uses_config_and_is_reproducible(tmp_path):
     assert len(raw_first) > len(clean_first)
     assert clean_first.equals(clean_second)
     assert raw_first.equals(raw_second)
-    assert {"Total_Waiting_Time", "Total_Length_of_Stay", "Patient_Satisfaction_Score"} <= set(clean_first)
+    assert {
+        "Total_Waiting_Time",
+        "Total_Length_of_Stay",
+        "Patient_Satisfaction_Score",
+    } <= set(clean_first)
     assert {"Laboratory_Requested", "Pharmacy_Needed", "Department"} <= set(raw_first)
 
 
